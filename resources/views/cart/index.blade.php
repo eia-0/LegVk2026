@@ -38,7 +38,14 @@
                     @foreach($cartItems as $item)
                     <tr class="border-b hover:bg-gray-50 transition" data-id="{{ $item->id }}">
                         <td class="p-4 flex items-center space-x-4">
-                            <img src="{{ $item->product->image ? asset('storage/'.$item->product->image) : 'https://via.placeholder.com/60x60' }}" class="w-12 h-12 object-cover rounded-lg">
+                            <div class="relative">
+                                <img src="{{ $item->product->image ? asset('storage/'.$item->product->image) : 'https://via.placeholder.com/60x60' }}" class="w-12 h-12 object-cover rounded-lg">
+                                @if($item->product->partner_id)
+                                    <div class="absolute -top-1 -right-1 bg-white rounded-full w-5 h-5 flex items-center justify-center shadow">
+                                        <img src="{{ asset('images/p.svg') }}" alt="Партнёр" class="w-3 h-3">
+                                    </div>
+                                @endif
+                            </div>
                             <span class="text-gray-800">{{ $item->product->name }}</span>
                         </td>
                         <td class="p-4 text-center text-gray-700">{{ $item->product->price }} ₽</td>
@@ -65,7 +72,14 @@
         <div class="md:hidden space-y-4">
             @foreach($cartItems as $item)
             <div class="bg-white rounded-xl shadow p-4 flex items-center gap-4">
-                <img src="{{ $item->product->image ? asset('storage/'.$item->product->image) : 'https://via.placeholder.com/60x60' }}" class="w-16 h-16 object-cover rounded-xl">
+                <div class="relative">
+                    <img src="{{ $item->product->image ? asset('storage/'.$item->product->image) : 'https://via.placeholder.com/60x60' }}" class="w-16 h-16 object-cover rounded-xl">
+                    @if($item->product->partner_id)
+                        <div class="absolute -top-1 -right-1 bg-white rounded-full w-5 h-5 flex items-center justify-center shadow">
+                            <img src="{{ asset('images/p.svg') }}" alt="Партнёр" class="w-3 h-3">
+                        </div>
+                    @endif
+                </div>
                 <div class="flex-1 min-w-0">
                     <h3 class="text-sm font-medium text-gray-800 truncate">{{ $item->product->name }}</h3>
                     <p class="text-sm text-gray-500">{{ $item->product->price }} ₽</p>

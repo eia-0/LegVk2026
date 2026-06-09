@@ -36,6 +36,15 @@
                 <input type="checkbox" name="unlimited" id="unlimited" value="1" {{ old('unlimited') ? 'checked' : '' }} class="text-amber-600">
                 <label for="unlimited">Всегда в наличии (неограниченно)</label>
             </div>
+            <div>
+                <label class="block mb-1">Партнёр (если товар партнёрский)</label>
+                <select name="partner_id" class="w-full border rounded p-2">
+                    <option value="">— Магазин —</option>
+                    @foreach($partners as $partner)
+                        <option value="{{ $partner->id }}" {{ old('partner_id') == $partner->id ? 'selected' : '' }}>{{ $partner->full_name }}</option>
+                    @endforeach
+                </select>
+            </div>
             <div class="md:col-span-2">
                 <label class="block mb-1">Описание</label>
                 <textarea name="description" rows="3" class="w-full border rounded p-2">{{ old('description') }}</textarea>

@@ -6,6 +6,7 @@
     <div class="mb-8">
         @php
             $settings = \App\Models\ShopSetting::getSettings();
+            // Сохраняем текущие параметры запроса для использования в форме и ссылках
             $currentCategory = request('category');
             $currentSearch = request('search');
             $currentSort = request('sort');
@@ -13,11 +14,16 @@
 
         {{-- Информация о самовывозе и доставке --}}
         <div class="bg-white rounded-2xl shadow-sm p-2.5 sm:p-4 space-y-2 sm:space-y-3 text-xs">
-            {{-- График работы прямо перед самовывозом --}}
+            {{-- График работы + ссылка Партнёрам --}}
             @if($settings->opening_hours)
-                <p class="text-gray-700 font-medium">
-                    График работы: {{ $settings->opening_hours }}
-                </p>
+                <div class="flex items-center justify-between">
+                    <p class="text-gray-700 font-medium">
+                        График работы: {{ $settings->opening_hours }}
+                    </p>
+                    <a href="{{ route('cooperation') }}" class="text-gray-700 hover:text-amber-600 font-medium text-xs underline underline-offset-2">
+                        Партнёрам
+                    </a>
+                </div>
             @endif
             <div>
                 <div class="flex items-center space-x-2 mb-1">
@@ -156,9 +162,14 @@
             <div class="product-card bg-white rounded-2xl shadow-md overflow-hidden transition duration-300 flex flex-col"
                  x-data="{ inCart: {{ $cartQuantities[$product->id] ?? 0 }} }"
                  @product-cart-updated.window="if ($event.detail.productId == {{ $product->id }}) inCart = $event.detail.quantity">
-                <a href="{{ route('product.show', $product) }}" class="block flex-shrink-0">
+                <a href="{{ route('product.show', $product) }}" class="block flex-shrink-0 relative">
                     <img src="{{ $product->image ? asset('storage/' . $product->image) . '?v=' . $product->updated_at->timestamp : 'https://via.placeholder.com/300x200?text=Товар' }}" 
                          class="w-full h-28 sm:h-48 object-cover rounded-t-2xl" alt="{{ $product->name }}" loading="lazy">
+                    @if($product->partner_id)
+                        <div class="absolute bottom-2 right-2 bg-white rounded-full w-6 h-6 flex items-center justify-center shadow">
+                            <img src="{{ asset('images/p.svg') }}" alt="Партнёр" class="w-4 h-4">
+                        </div>
+                    @endif
                 </a>
                 <div class="p-2 sm:p-5 flex flex-col flex-1">
                     <h3 class="text-xs sm:text-lg font-bold text-gray-800 line-clamp-2 leading-tight">{{ $product->name }}</h3>

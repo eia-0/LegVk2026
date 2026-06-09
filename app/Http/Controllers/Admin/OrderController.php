@@ -10,9 +10,7 @@ class OrderController extends Controller
 {
     public function index()
     {
-        // Отмечаем все непросмотренные заказы как просмотренные
         Order::where('admin_seen', false)->update(['admin_seen' => true]);
-
         $orders = Order::with('user', 'deliveryAddress')->latest()->paginate(20);
         return view('admin.orders.index', compact('orders'));
     }
@@ -28,10 +26,7 @@ class OrderController extends Controller
 
     public function updateStatus(Request $request, Order $order)
     {
-        $validStatuses = [
-            'new', 'accepted_cooking', 'ready_for_pickup',
-            'ready_for_delivery', 'delivering', 'completed', 'cancelled'
-        ];
+        $validStatuses = ['new', 'accepted_cooking', 'ready_for_pickup', 'ready_for_delivery', 'delivering', 'completed', 'cancelled'];
 
         $request->validate([
             'status' => 'required|in:' . implode(',', $validStatuses),
@@ -39,6 +34,15 @@ class OrderController extends Controller
         ], [
             'cancellation_reason.required_if' => 'Укажите причину отмены.',
         ]);
+
+        // Возврат стока при отмене
+        if ($request->status === 'cancelled' && $order->status !== 'cancelled') {
+            foreach ($order->items as $item) {
+                if ($item->product) {
+                    $item->product->increment('stock', $item->quantity);
+                }
+            }
+        }
 
         $order->status = $request->status;
         if ($request->status === 'cancelled') {
@@ -51,14 +55,12 @@ class OrderController extends Controller
         return back()->with('success', 'Статус заказа обновлён');
     }
 
-    // API для получения количества непросмотренных заказов
     public function unseenCount()
     {
         $count = Order::where('admin_seen', false)->count();
         return response()->json(['count' => $count]);
     }
 
-    // API для получения статуса заказа (автообновление на странице)
     public function status(Order $order)
     {
         return response()->json([

@@ -37,9 +37,9 @@
     {{-- Верхняя навигация --}}
     <nav class="bg-white shadow-md sticky top-0 z-40">
         <div class="container mx-auto px-2.5 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                {{-- Левая часть: логотип + Сотрудничество --}}
-                <div class="flex items-center space-x-2">
+            <div class="flex justify-between h-14 items-center">
+                {{-- Левая часть: логотип + название --}}
+                <div class="flex items-center">
                     <a href="{{ route('home') }}" class="flex items-center space-x-2">
                         <div class="w-10 h-10 flex-shrink-0">
                             @if($logoContent)
@@ -48,67 +48,65 @@
                                 <img src="{{ asset('images/lvlogo.svg') }}" alt="ЛегендаВкуса" class="w-10 h-10 object-contain">
                             @endif
                         </div>
-                        <span class="hidden min-[620px]:inline text-xl font-bold text-amber-700 tracking-wide">ЛегендаВкуса</span>
+                        {{-- Название всегда видно, на мобильных меньше шрифт --}}
+                        <span class="text-xl font-bold text-amber-700 tracking-wide hidden sm:inline">ЛегендаВкуса</span>
+                        <span class="text-sm font-bold text-amber-700 tracking-wide sm:hidden">ЛегендаВкуса</span>
                     </a>
-                    <a href="{{ route('cooperation') }}" class="text-gray-700 hover:text-amber-600 font-medium text-sm sm:text-base">партнерам</a>
                 </div>
 
-                {{-- Правая часть: навигация или кнопки --}}
-                <div class="flex items-center space-x-3">
-                    {{-- Десктопная навигация --}}
-                    <div class="hidden md:flex items-center space-x-4">
-                        <a href="{{ route('home') }}" class="text-gray-700 hover:text-amber-600 font-medium">Каталог</a>
-                        @auth
-                            <a href="{{ route('cart.index') }}" class="text-gray-700 hover:text-amber-600 relative font-medium">
-                                Корзина
-                                <span x-show="cartCount > 0" x-text="cartCount" class="absolute -top-2 -right-4 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center shadow"></span>
-                            </a>
-                            <a href="{{ route('orders.index') }}" class="text-gray-700 hover:text-amber-600 relative font-medium">
-                                Мои заказы
-                                @if(($activeOrders = auth()->user()->orders()->whereIn('status', ['new','processing'])->count()) > 0)
-                                    <span class="absolute -top-2 -right-4 bg-green-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center shadow">{{ $activeOrders }}</span>
-                                @endif
-                            </a>
-                            @if(auth()->user()->is_admin)
-                                <a href="{{ route('admin.dashboard') }}" class="text-gray-700 hover:text-amber-600 font-semibold">Админка</a>
+                {{-- Десктопная навигация --}}
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="{{ route('home') }}" class="text-gray-700 hover:text-amber-600 font-medium">Каталог</a>
+                    @auth
+                        <a href="{{ route('cart.index') }}" class="text-gray-700 hover:text-amber-600 relative font-medium">
+                            Корзина
+                            <span x-show="cartCount > 0" x-text="cartCount" class="absolute -top-2 -right-4 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center shadow"></span>
+                        </a>
+                        <a href="{{ route('orders.index') }}" class="text-gray-700 hover:text-amber-600 relative font-medium">
+                            Мои заказы
+                            @if(($activeOrders = auth()->user()->orders()->whereIn('status', ['new','processing'])->count()) > 0)
+                                <span class="absolute -top-2 -right-4 bg-green-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center shadow">{{ $activeOrders }}</span>
                             @endif
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="text-gray-700 hover:text-amber-600 font-medium">Выйти</button>
-                            </form>
-                        @else
-                            <a href="{{ route('login') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-full hover:bg-gray-300 transition font-medium">Вход</a>
-                            <a href="{{ route('register') }}" class="bg-amber-600 text-white px-4 py-2 rounded-full hover:bg-amber-700 transition font-medium">Регистрация</a>
-                        @endauth
-                    </div>
+                        </a>
+                        @if(auth()->user()->is_admin)
+                            <a href="{{ route('admin.dashboard') }}" class="text-gray-700 hover:text-amber-600 font-semibold">Админка</a>
+                        @endif
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="text-gray-700 hover:text-amber-600 font-medium">Выйти</button>
+                        </form>
+                    @else
+                        <a href="{{ route('login') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-full hover:bg-gray-300 transition font-medium">Вход</a>
+                        <a href="{{ route('register') }}" class="bg-amber-600 text-white px-4 py-2 rounded-full hover:bg-amber-700 transition font-medium">Регистрация</a>
+                    @endauth
+                </div>
 
-                    {{-- Мобильная навигация --}}
-                    <div class="md:hidden flex items-center space-x-2">
-                        @auth
-                            <div x-data="{ open: false }">
-                                <button @click="open = !open" class="text-gray-700 focus:outline-none">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                                    </svg>
-                                </button>
-                                <div x-show="open" @click.away="open = false" class="absolute right-4 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                                    <a href="{{ route('home') }}" class="block px-4 py-2 text-gray-700">Каталог</a>
-                                    <a href="{{ route('cart.index') }}" class="block px-4 py-2">Корзина</a>
-                                    <a href="{{ route('orders.index') }}" class="block px-4 py-2">Заказы</a>
-                                    @if(auth()->user()->is_admin)
-                                        <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2">Админка</a>
-                                    @endif
-                                    <form method="POST" action="{{ route('logout') }}">
-                                        @csrf
-                                        <button class="block w-full text-left px-4 py-2">Выйти</button>
-                                    </form>
-                                </div>
+                {{-- Мобильная навигация --}}
+                <div class="md:hidden flex items-center space-x-2">
+                    @auth
+                        <div x-data="{ open: false }">
+                            <button @click="open = !open" class="text-gray-700 focus:outline-none">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                                </svg>
+                            </button>
+                            <div x-show="open" @click.away="open = false" class="absolute right-4 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                                <a href="{{ route('home') }}" class="block px-4 py-2 text-gray-700">Каталог</a>
+                                <a href="{{ route('cart.index') }}" class="block px-4 py-2">Корзина</a>
+                                <a href="{{ route('orders.index') }}" class="block px-4 py-2">Заказы</a>
+                                @if(auth()->user()->is_admin)
+                                    <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2">Админка</a>
+                                @endif
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button class="block w-full text-left px-4 py-2">Выйти</button>
+                                </form>
                             </div>
-                        @else
-                            <a href="{{ route('login') }}" class="bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-sm hover:bg-gray-300 transition font-medium">Вход</a>
-                            <a href="{{ route('register') }}" class="bg-amber-600 text-white px-3 py-1.5 rounded-full text-sm hover:bg-amber-700 transition font-medium">Регистрация</a>
-                        @endauth
-                    </div>
+                        </div>
+                    @else
+                        <a href="{{ route('login') }}" class="bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-sm hover:bg-gray-300 transition font-medium">Вход</a>
+                        <a href="{{ route('register') }}" class="bg-amber-600 text-white px-3 py-1.5 rounded-full text-sm hover:bg-amber-700 transition font-medium">Регистрация</a>
+                    @endauth
                 </div>
             </div>
         </div>

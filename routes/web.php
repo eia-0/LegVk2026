@@ -9,6 +9,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ShopSettingController;
+use App\Http\Controllers\Admin\PartnerController;
 
 // Главная страница
 Route::get('/', function (Request $request) {
@@ -16,7 +17,6 @@ Route::get('/', function (Request $request) {
 
     $productsQuery = \App\Models\Product::with('category');
 
-    // Фильтр по категории
     if ($request->has('category')) {
         $categoryId = $request->input('category');
         $category = \App\Models\Category::find($categoryId);
@@ -29,13 +29,11 @@ Route::get('/', function (Request $request) {
         }
     }
 
-    // Поиск по названию
     if ($request->filled('search')) {
         $search = $request->input('search');
         $productsQuery->where('name', 'like', "%{$search}%");
     }
 
-    // Сортировка
     $sort = $request->input('sort');
     switch ($sort) {
         case 'price_asc':
@@ -51,7 +49,7 @@ Route::get('/', function (Request $request) {
             $productsQuery->orderBy('name', 'desc');
             break;
         default:
-            $productsQuery->latest();
+            $productsQuery->inRandomOrder();
             break;
     }
 
@@ -65,22 +63,18 @@ Route::get('/', function (Request $request) {
     return view('home', compact('categories', 'products', 'cartQuantities'));
 })->name('home');
 
-// Маршрут dashboard для Breeze (перенаправление на главную)
 Route::get('/dashboard', function () {
     return redirect()->route('home');
 })->name('dashboard');
 
-// Публичный просмотр товара
 Route::get('/product/{product}', [ProductController::class, 'show'])->name('product.show');
 
 Route::middleware('auth')->group(function () {
-    // Корзина
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
     Route::delete('/cart/{cartItem}', [CartController::class, 'remove'])->name('cart.remove');
     Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
-    // Заказы пользователя
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/order/create', [OrderController::class, 'create'])->name('order.create');
     Route::post('/order', [OrderController::class, 'store'])->name('order.store');
@@ -88,28 +82,26 @@ Route::middleware('auth')->group(function () {
     Route::get('/order/{order}/status', [OrderController::class, 'status'])->name('orders.status');
 });
 
-// Админка
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    
+
     Route::resource('categories', CategoryController::class)->except(['show']);
     Route::resource('products', ProductController::class)->except(['show']);
-    
+    Route::resource('partners', PartnerController::class);
+
     Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('orders/unseen-count', [AdminOrderController::class, 'unseenCount'])->name('orders.unseen-count');
     Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
     Route::get('orders/{order}/status', [AdminOrderController::class, 'status'])->name('admin.orders.status');
     Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.status');
-    
+
     Route::get('settings', [ShopSettingController::class, 'edit'])->name('settings.edit');
     Route::patch('settings', [ShopSettingController::class, 'update'])->name('settings.update');
 });
 
-// Страница "Партнёрам"
 Route::get('/cooperation', function () {
     $settings = \App\Models\ShopSetting::getSettings();
     return view('cooperation', compact('settings'));
 })->name('cooperation');
 
-// Маршруты аутентификации Breeze
 require __DIR__.'/auth.php';

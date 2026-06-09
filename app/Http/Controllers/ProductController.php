@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Partner;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -16,19 +17,21 @@ class ProductController extends Controller
                 ->where('product_id', $product->id)->first();
             $cartQuantity = $cartItem ? $cartItem->quantity : 0;
         }
+        $product->load('partner');
         return view('product.show', compact('product', 'cartQuantity'));
     }
 
     public function index()
     {
-        $products = Product::with('category')->paginate(20);
+        $products = Product::with('category', 'partner')->paginate(20);
         return view('admin.products.index', compact('products'));
     }
 
     public function create()
     {
         $categories = Category::with('children')->get();
-        return view('admin.products.create', compact('categories'));
+        $partners = Partner::all();
+        return view('admin.products.create', compact('categories', 'partners'));
     }
 
     public function store(Request $request)
@@ -42,9 +45,10 @@ class ProductController extends Controller
             'preparation_time' => 'nullable|integer|min:0',
             'stock' => 'nullable|integer|min:0',
             'unlimited' => 'boolean',
+            'partner_id' => 'nullable|exists:partners,id',
         ]);
 
-        $data = $request->only('name', 'description', 'price', 'category_id', 'preparation_time', 'stock', 'unlimited');
+        $data = $request->only('name', 'description', 'price', 'category_id', 'preparation_time', 'stock', 'unlimited', 'partner_id');
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('products', 'public');
         }
@@ -56,7 +60,8 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         $categories = Category::with('children')->get();
-        return view('admin.products.edit', compact('product', 'categories'));
+        $partners = Partner::all();
+        return view('admin.products.edit', compact('product', 'categories', 'partners'));
     }
 
     public function update(Request $request, Product $product)
@@ -70,9 +75,10 @@ class ProductController extends Controller
             'preparation_time' => 'nullable|integer|min:0',
             'stock' => 'nullable|integer|min:0',
             'unlimited' => 'boolean',
+            'partner_id' => 'nullable|exists:partners,id',
         ]);
 
-        $data = $request->only('name', 'description', 'price', 'category_id', 'preparation_time', 'stock', 'unlimited');
+        $data = $request->only('name', 'description', 'price', 'category_id', 'preparation_time', 'stock', 'unlimited', 'partner_id');
         if ($request->hasFile('image')) {
             if ($product->image) {
                 \Storage::disk('public')->delete($product->image);
