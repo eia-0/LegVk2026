@@ -45,6 +45,10 @@
                     @endforeach
                 </select>
             </div>
+            <div>
+                <label class="block mb-1">Комиссия магазина (%)</label>
+                <input type="number" name="commission_percent" value="{{ old('commission_percent', $product->commission_percent ?? 10) }}" min="0" max="100" step="1" class="w-full border rounded p-2" placeholder="10">
+            </div>
             <div class="md:col-span-2">
                 <label class="block mb-1">Описание</label>
                 <textarea name="description" rows="3" class="w-full border rounded p-2">{{ old('description', $product->description) }}</textarea>

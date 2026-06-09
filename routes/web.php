@@ -87,6 +87,11 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
 
     Route::resource('categories', CategoryController::class)->except(['show']);
     Route::resource('products', ProductController::class)->except(['show']);
+    
+    // Кастомный маршрут ДО ресурсного partners
+    Route::post('partners/{partner}/products/{product}/reset-payout', [PartnerController::class, 'resetPayout'])
+         ->name('partners.reset-payout');
+
     Route::resource('partners', PartnerController::class);
 
     Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');

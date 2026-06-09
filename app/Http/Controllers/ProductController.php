@@ -46,9 +46,11 @@ class ProductController extends Controller
             'stock' => 'nullable|integer|min:0',
             'unlimited' => 'boolean',
             'partner_id' => 'nullable|exists:partners,id',
+            'commission_percent' => 'nullable|integer|min:0|max:100',
         ]);
 
         $data = $request->only('name', 'description', 'price', 'category_id', 'preparation_time', 'stock', 'unlimited', 'partner_id');
+        $data['commission_percent'] = $request->partner_id ? $request->commission_percent : null;
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('products', 'public');
         }
@@ -76,9 +78,11 @@ class ProductController extends Controller
             'stock' => 'nullable|integer|min:0',
             'unlimited' => 'boolean',
             'partner_id' => 'nullable|exists:partners,id',
+            'commission_percent' => 'nullable|integer|min:0|max:100',
         ]);
 
         $data = $request->only('name', 'description', 'price', 'category_id', 'preparation_time', 'stock', 'unlimited', 'partner_id');
+        $data['commission_percent'] = $request->partner_id ? $request->commission_percent : null;
         if ($request->hasFile('image')) {
             if ($product->image) {
                 \Storage::disk('public')->delete($product->image);
@@ -87,7 +91,7 @@ class ProductController extends Controller
         }
         $data['unlimited'] = $request->has('unlimited');
         $product->update($data);
-        return redirect()->route('admin.products.index')->with('success', 'Товар обновлен');
+        return redirect()->route('admin.products.index')->with('success', 'Товар обновлён');
     }
 
     public function destroy(Product $product)
@@ -96,6 +100,6 @@ class ProductController extends Controller
             \Storage::disk('public')->delete($product->image);
         }
         $product->delete();
-        return redirect()->route('admin.products.index')->with('success', 'Товар удален');
+        return redirect()->route('admin.products.index')->with('success', 'Товар удалён');
     }
 }

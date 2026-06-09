@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Partner;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class PartnerController extends Controller
@@ -58,7 +59,19 @@ class PartnerController extends Controller
     public function show(Partner $partner)
     {
         $partner->load('products');
-        $soldCount = $partner->soldItemsCount();
+        $soldCount = $partner->soldItemsCount(); // общее количество продаж всех товаров (без учёта сбросов)
         return view('admin.partners.show', compact('partner', 'soldCount'));
+    }
+
+    /**
+     * Сброс продаж конкретного товара (устанавливает payout_reset_at)
+     */
+    public function resetPayout(Partner $partner, Product $product)
+    {
+        if ($product->partner_id !== $partner->id) {
+            abort(404);
+        }
+        $product->update(['payout_reset_at' => now()]);
+        return back()->with('success', 'Продажи обнулены для товара "' . $product->name . '"');
     }
 }

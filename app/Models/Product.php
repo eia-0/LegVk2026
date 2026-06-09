@@ -16,10 +16,14 @@ class Product extends Model
         'stock',
         'unlimited',
         'partner_id',
+        'commission_percent',
+        'payout_reset_at',
     ];
 
     protected $casts = [
         'unlimited' => 'boolean',
+        'commission_percent' => 'integer',
+        'payout_reset_at' => 'datetime',
     ];
 
     public function category()
@@ -48,5 +52,18 @@ class Product extends Model
         if (!$this->unlimited && $this->stock !== null) {
             $this->decrement('stock', $quantity);
         }
+    }
+
+    /**
+     * Продажи с момента последнего обнуления (payout_reset_at)
+     */
+    public function soldSinceLastPayout(): int
+    {
+        return $this->orderItems()
+            ->whereHas('order', fn($q) => $q->where('status', '!=', 'cancelled'))
+            ->when($this->payout_reset_at, function ($query) {
+                $query->where('order_items.created_at', '>=', $this->payout_reset_at);
+            })
+            ->sum('quantity');
     }
 }
