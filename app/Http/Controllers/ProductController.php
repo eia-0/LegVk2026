@@ -17,7 +17,7 @@ class ProductController extends Controller
                 ->where('product_id', $product->id)->first();
             $cartQuantity = $cartItem ? $cartItem->quantity : 0;
         }
-        $product->load('partner');
+        $product->load('partner', 'relatedProducts');
         return view('product.show', compact('product', 'cartQuantity'));
     }
 
@@ -55,7 +55,16 @@ class ProductController extends Controller
             $data['image'] = $request->file('image')->store('products', 'public');
         }
         $data['unlimited'] = $request->has('unlimited');
-        Product::create($data);
+        $product = Product::create($data);
+        
+        // Связанные товары при создании (если нужно)
+        if ($request->has('related_products')) {
+            $related = collect($request->related_products)->mapWithKeys(function ($id, $index) {
+                return [$id => ['order' => $index]];
+            })->toArray();
+            $product->relatedProducts()->sync($related);
+        }
+        
         return redirect()->route('admin.products.index')->with('success', 'Товар добавлен');
     }
 
@@ -63,7 +72,10 @@ class ProductController extends Controller
     {
         $categories = Category::with('children')->get();
         $partners = Partner::all();
-        return view('admin.products.edit', compact('product', 'categories', 'partners'));
+        $allProducts = Product::where('id', '!=', $product->id)->orderBy('name')->get();
+        $relatedIds = $product->relatedProducts()->pluck('related_product_id')->toArray();
+        
+        return view('admin.products.edit', compact('product', 'categories', 'partners', 'allProducts', 'relatedIds'));
     }
 
     public function update(Request $request, Product $product)
@@ -91,6 +103,17 @@ class ProductController extends Controller
         }
         $data['unlimited'] = $request->has('unlimited');
         $product->update($data);
+
+        // Синхронизация связанных товаров
+        if ($request->has('related_products')) {
+            $related = collect($request->related_products)->mapWithKeys(function ($id, $index) {
+                return [$id => ['order' => $index]];
+            })->toArray();
+            $product->relatedProducts()->sync($related);
+        } else {
+            $product->relatedProducts()->detach();
+        }
+
         return redirect()->route('admin.products.index')->with('success', 'Товар обновлён');
     }
 

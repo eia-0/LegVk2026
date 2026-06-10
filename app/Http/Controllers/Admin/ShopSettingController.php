@@ -37,6 +37,9 @@ class ShopSettingController extends Controller
             'phone',
         ]));
 
+        // Сбрасываем кэш после обновления настроек
+        cache()->forget('shop_settings');
+
         return back()->with('success', 'Настройки обновлены');
     }
 }

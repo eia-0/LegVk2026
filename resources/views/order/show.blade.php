@@ -20,6 +20,7 @@
             <p><strong>Время доставки:</strong> {{ $order->delivery_time }}</p>
         @endif
         <p><strong>Телефон:</strong> {{ $order->phone ?? 'не указан' }}</p>
+        <p><strong>Способ оплаты:</strong> {{ $order->payment_method === 'cash' ? 'Наличные' : 'QR-код' }}</p>
         @if($order->callback_needed)
             <p class="text-amber-600 font-semibold">Требуется звонок для подтверждения</p>
         @else

@@ -71,6 +71,21 @@
                     <img src="{{ asset('storage/'.$product->image) }}" class="w-16 mt-2 rounded">
                 @endif
             </div>
+
+            {{-- Связанные товары --}}
+            <div class="md:col-span-2">
+                <label class="block mb-1">Связанные товары (с этим также берут)</label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto border rounded p-2">
+                    @foreach($allProducts as $p)
+                        <label class="flex items-center space-x-2 text-sm">
+                            <input type="checkbox" name="related_products[]" value="{{ $p->id }}" 
+                                   {{ in_array($p->id, $relatedIds) ? 'checked' : '' }}>
+                            <span>{{ $p->name }}</span>
+                        </label>
+                    @endforeach
+                </div>
+                <p class="text-xs text-gray-500 mt-1">Отмеченные товары появятся в блоке «С этим также берут». Порядок соответствует порядку установки галочек.</p>
+            </div>
         </div>
         <button type="submit" class="mt-4 bg-amber-500 text-white px-6 py-2 rounded-full">Обновить</button>
     </form>

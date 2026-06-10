@@ -69,6 +69,29 @@
         </div>
     </div>
 
+    {{-- Плашки активных заказов --}}
+    @auth
+        @php
+            $activeOrders = \App\Models\Order::where('user_id', auth()->id())
+                ->whereNotIn('status', ['completed', 'cancelled'])
+                ->latest()
+                ->get();
+        @endphp
+        @if($activeOrders->isNotEmpty())
+            <div class="space-y-2 mb-6">
+                @foreach($activeOrders as $activeOrder)
+                    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-2 sm:p-3 flex items-center justify-between text-xs sm:text-sm">
+                        <div class="flex items-center space-x-2 min-w-0">
+                            <span class="h-2.5 w-2.5 rounded-full {{ $activeOrder->status_color }} flex-shrink-0"></span>
+                            <span class="text-gray-700 truncate">Заказ <strong>№{{ $activeOrder->id }}</strong> — {{ $activeOrder->status_ru }}</span>
+                        </div>
+                        <a href="{{ route('orders.show', $activeOrder) }}" class="text-amber-600 underline text-xs sm:text-sm font-medium flex-shrink-0 ml-2">Перейти к заказу</a>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+    @endauth
+
     {{-- Категории --}}
     <div class="mb-8">
         <h2 class="text-2xl font-bold text-gray-800 mb-6">Категории</h2>

@@ -38,7 +38,6 @@
     <nav class="bg-white shadow-md sticky top-0 z-40">
         <div class="container mx-auto px-2.5 sm:px-6 lg:px-8">
             <div class="flex justify-between h-14 items-center">
-                {{-- Левая часть: логотип + название --}}
                 <div class="flex items-center">
                     <a href="{{ route('home') }}" class="flex items-center space-x-2">
                         <div class="w-10 h-10 flex-shrink-0">
@@ -48,9 +47,8 @@
                                 <img src="{{ asset('images/lvlogo.svg') }}" alt="ЛегендаВкуса" class="w-10 h-10 object-contain">
                             @endif
                         </div>
-                        {{-- Название всегда видно, на мобильных меньше шрифт --}}
-                        <span class="text-xl font-bold text-amber-700 tracking-wide hidden sm:inline">ЛегендаВкуса</span>
-                        <span class="text-sm font-bold text-amber-700 tracking-wide sm:hidden">ЛегендаВкуса</span>
+                        <span class="hidden sm:inline text-xl font-bold text-amber-700 tracking-wide">ЛегендаВкуса</span>
+                        <span class="sm:hidden text-sm font-bold text-amber-700 tracking-wide">ЛегендаВкуса</span>
                     </a>
                 </div>
 
@@ -60,7 +58,9 @@
                     @auth
                         <a href="{{ route('cart.index') }}" class="text-gray-700 hover:text-amber-600 relative font-medium">
                             Корзина
-                            <span x-show="cartCount > 0" x-text="cartCount" class="absolute -top-2 -right-4 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center shadow"></span>
+                            <span x-show="cartCount > 0" x-text="cartCount"
+                                  class="absolute -top-2 -right-4 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center shadow"
+                                  style="display: none;"></span>
                         </a>
                         <a href="{{ route('orders.index') }}" class="text-gray-700 hover:text-amber-600 relative font-medium">
                             Мои заказы
@@ -140,7 +140,9 @@
             </a>
             <a href="{{ route('cart.index') }}" class="flex flex-col items-center justify-center flex-1 h-full relative {{ request()->routeIs('cart.*') ? 'text-amber-600' : 'text-gray-500' }}">
                 <span class="text-2xl">🛒</span>
-                <span x-show="cartCount > 0" x-text="cartCount" class="absolute top-1 right-1/3 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"></span>
+                <span x-show="cartCount > 0" x-text="cartCount"
+                      class="absolute top-1 right-1/3 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
+                      style="display: none;"></span>
                 <span class="text-xs">Корзина</span>
             </a>
             <a href="{{ route('orders.index') }}" class="flex flex-col items-center justify-center flex-1 h-full relative {{ request()->routeIs('orders.*') ? 'text-amber-600' : 'text-gray-500' }}">

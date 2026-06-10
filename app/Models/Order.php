@@ -7,22 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     protected $fillable = [
-    'user_id',
-    'delivery_type',
-    'delivery_address_id',
-    'phone',
-    'callback_needed',
-    'delivery_date',
-    'delivery_time',
-    'status',
-    'cancellation_reason',
-    'admin_seen',
-    'total',
+        'user_id',
+        'delivery_type',
+        'delivery_address_id',
+        'phone',
+        'callback_needed',
+        'payment_method',
+        'delivery_date',
+        'delivery_time',
+        'status',
+        'cancellation_reason',
+        'total',
     ];
 
     protected $casts = [
-    'callback_needed' => 'boolean',
-    'admin_seen' => 'boolean',
+        'callback_needed' => 'boolean',
+        'admin_seen' => 'boolean',
     ];
 
     public function user()

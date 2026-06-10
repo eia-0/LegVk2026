@@ -54,9 +54,6 @@ class Product extends Model
         }
     }
 
-    /**
-     * Продажи с момента последнего обнуления (payout_reset_at)
-     */
     public function soldSinceLastPayout(): int
     {
         return $this->orderItems()
@@ -65,5 +62,15 @@ class Product extends Model
                 $query->where('order_items.created_at', '>=', $this->payout_reset_at);
             })
             ->sum('quantity');
+    }
+
+    /**
+     * Связанные товары для блока "С этим также берут"
+     */
+    public function relatedProducts()
+    {
+        return $this->belongsToMany(Product::class, 'product_related', 'product_id', 'related_product_id')
+                    ->withPivot('order')
+                    ->orderBy('order');
     }
 }

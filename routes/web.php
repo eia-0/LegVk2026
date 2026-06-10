@@ -13,7 +13,10 @@ use App\Http\Controllers\Admin\PartnerController;
 
 // Главная страница
 Route::get('/', function (Request $request) {
-    $categories = \App\Models\Category::with('children')->whereNull('parent_id')->get();
+    // Кэшируем категории на 1 час (3600 секунд)
+    $categories = cache()->remember('home_categories', 3600, function () {
+        return \App\Models\Category::with('children')->whereNull('parent_id')->get();
+    });
 
     $productsQuery = \App\Models\Product::with('category');
 
@@ -87,11 +90,8 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
 
     Route::resource('categories', CategoryController::class)->except(['show']);
     Route::resource('products', ProductController::class)->except(['show']);
-    
-    // Кастомный маршрут ДО ресурсного partners
     Route::post('partners/{partner}/products/{product}/reset-payout', [PartnerController::class, 'resetPayout'])
          ->name('partners.reset-payout');
-
     Route::resource('partners', PartnerController::class);
 
     Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');

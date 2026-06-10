@@ -56,5 +56,22 @@
                 @endauth
             </div>
         </div>
+
+        {{-- Блок "С этим также берут" --}}
+        @if($product->relatedProducts->isNotEmpty())
+            <div class="mt-8">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">С этим также берут</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    @foreach($product->relatedProducts as $related)
+                        <a href="{{ route('product.show', $related) }}" class="bg-gray-50 rounded-xl p-3 hover:shadow-md transition">
+                            <img src="{{ $related->image ? asset('storage/'.$related->image) : 'https://via.placeholder.com/150' }}" 
+                                 class="w-full h-32 object-cover rounded-lg mb-2">
+                            <h4 class="text-sm font-medium text-gray-800 line-clamp-1">{{ $related->name }}</h4>
+                            <p class="text-amber-600 font-semibold text-sm mt-1">{{ number_format($related->price, 0) }} ₽</p>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        @endif
     </div>
 @endsection

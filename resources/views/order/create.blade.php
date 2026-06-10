@@ -3,7 +3,7 @@
 @section('title', 'Оформление заказа')
 
 @section('content')
-    <h1 class="text-3xl font-bold text-gray-800 mb-6">Оформление заказа</h1>
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">Оформление заказа</h1>
 
     @if ($errors->any())
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -97,9 +97,9 @@
         @csrf
 
         {{-- Тип доставки --}}
-        <div class="bg-white p-6 rounded-2xl shadow mb-6">
-            <label class="block text-lg font-medium mb-3">Способ получения:</label>
-            <div class="flex flex-col sm:flex-row gap-4">
+        <div class="bg-white p-3 rounded-2xl shadow mb-3">
+            <label class="block text-base font-medium mb-2">Способ получения:</label>
+            <div class="flex items-center gap-4">
                 <label class="flex items-center space-x-2 cursor-pointer">
                     <input type="radio" name="delivery_type" value="pickup" x-model="deliveryType" 
                            @change="if (deliveryType === 'pickup') $nextTick(() => initPickupMap())" class="text-amber-600">
@@ -113,49 +113,47 @@
                 </label>
             </div>
             @if(!$settings->delivery_enabled)
-                <p class="text-red-500 text-sm mt-2">Доставка временно отключена.</p>
+                <p class="text-red-500 text-xs mt-1">Доставка временно отключена.</p>
             @endif
         </div>
 
         {{-- Блок самовывоза --}}
-        <div x-show="deliveryType === 'pickup'" class="bg-white p-6 rounded-2xl shadow mb-6">
-            <h2 class="text-xl font-semibold mb-3">Самовывоз</h2>
+        <div x-show="deliveryType === 'pickup'" class="bg-white p-3 rounded-2xl shadow mb-3">
+            <h2 class="text-base font-semibold mb-2">Самовывоз</h2>
             @if($settings->pickup_address)
-                <p class="mb-2">
+                <p class="text-sm">
                     {{ $settings->pickup_address }}
                     @if($settings->pickup_entrance), п. {{ $settings->pickup_entrance }}@endif
-                    @if($settings->phone)
-                        <br>{{ $settings->phone }}
-                    @endif
+                    @if($settings->phone), {{ $settings->phone }}@endif
                 </p>
                 @if(isset($pickupReadyAt) && $pickupReadyAt->gt(now()))
-                    <p class="text-sm text-gray-600 mt-2">Ближайшее время самовывоза: {{ $pickupReadyAt->format('d.m.Y в H:i') }}</p>
+                    <p class="text-xs text-gray-600 mt-1">Ближайшее время самовывоза: {{ $pickupReadyAt->format('d.m.Y в H:i') }}</p>
                 @endif
                 @if($settings->pickup_latitude && $settings->pickup_longitude)
-                    <div id="pickup-map" style="height: 250px;" class="rounded-lg border"></div>
+                    <div id="pickup-map" style="height: 180px;" class="rounded-lg border mt-2"></div>
                 @endif
             @else
-                <p class="text-gray-500">Адрес самовывоза не указан.</p>
+                <p class="text-sm text-gray-500">Адрес самовывоза не указан.</p>
             @endif
         </div>
 
         {{-- Блок доставки --}}
-        <div x-show="deliveryType === 'delivery'" class="bg-white p-6 rounded-2xl shadow mb-6">
-            <h2 class="text-xl font-semibold mb-3">Адрес доставки</h2>
-            <p class="mb-3">
+        <div x-show="deliveryType === 'delivery'" class="bg-white p-3 rounded-2xl shadow mb-3">
+            <h2 class="text-base font-semibold mb-2">Адрес доставки</h2>
+            <p class="text-sm mb-2">
                 Стоимость доставки: 
                 <span class="font-bold text-amber-700">{{ $deliveryCost }} ₽</span>
                 @if($deliveryCost > 0 && $settings->free_delivery_from)
-                    <span class="text-sm text-gray-500"> (бесплатно при заказе от {{ $settings->free_delivery_from }} ₽)</span>
+                    <span class="text-xs text-gray-500"> (бесплатно при заказе от {{ $settings->free_delivery_from }} ₽)</span>
                 @elseif($deliveryCost == 0 && $settings->delivery_enabled)
-                    <span class="text-green-600 text-sm"> (бесплатно)</span>
+                    <span class="text-green-600 text-xs"> (бесплатно)</span>
                 @endif
             </p>
 
             @if($addresses->count())
-                <div class="mb-4">
-                    <label class="block text-sm font-medium mb-2">Выберите сохраненный адрес:</label>
-                    <select x-model="selectedAddressId" name="delivery_address_id" class="w-full sm:w-1/2 border border-gray-300 rounded-lg p-2">
+                <div class="mb-2">
+                    <label class="block text-sm font-medium mb-1">Выберите сохраненный адрес:</label>
+                    <select x-model="selectedAddressId" name="delivery_address_id" class="w-full sm:w-1/2 border border-gray-300 rounded-lg p-2 text-sm">
                         <option value="">-- Выбрать --</option>
                         @foreach($addresses as $addr)
                             <option value="{{ $addr->id }}">
@@ -166,16 +164,16 @@
                     </select>
                 </div>
             @else
-                <p class="text-gray-500 mb-3">У вас пока нет сохранённых адресов.</p>
+                <p class="text-sm text-gray-500 mb-2">У вас пока нет сохранённых адресов.</p>
                 <input type="hidden" x-model="selectedAddressId" value="new">
             @endif
 
             <div x-show="selectedAddressId === 'new' || {{ $addresses->count() ? 'false' : 'true' }}">
                 <button type="button" @click="openMapModal()"
-                    class="bg-amber-100 text-amber-800 px-4 py-2 rounded-full hover:bg-amber-200">
+                    class="bg-amber-100 text-amber-800 px-3 py-1.5 rounded-full text-sm hover:bg-amber-200">
                     Указать адрес на карте
                 </button>
-                <div x-show="newAddress.street" class="mt-2 text-gray-700">
+                <div x-show="newAddress.street" class="mt-2 text-sm text-gray-700">
                     Выбран: <span x-text="newAddress.street + ', ' + newAddress.house"></span>
                     <span x-show="newAddress.entrance">, п. <span x-text="newAddress.entrance"></span></span>
                     <span x-show="newAddress.apartment">, кв. <span x-text="newAddress.apartment"></span></span>
@@ -192,7 +190,7 @@
             <input type="hidden" name="new_address[intercom]" id="new_address_intercom">
 
             {{-- Выбор даты и времени доставки --}}
-            <div class="mt-4">
+            <div class="mt-2">
                 <button type="button" @click="showDeliveryTimePicker = !showDeliveryTimePicker" class="text-amber-600 underline text-sm">
                     Выбрать конкретную дату и время доставки
                 </button>
@@ -212,99 +210,115 @@
 
         {{-- Примерное время приготовления --}}
         @if($maxPrepTime > 0)
-            <div class="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg mb-6">
+            <div class="bg-amber-50 border border-amber-200 text-amber-800 px-3 py-2 rounded-lg mb-3 text-sm">
                 ⏱ Примерное время приготовления заказа: <strong>{{ $maxPrepTime }} мин.</strong>
                 @if(isset($minDeliveryDate))
-                    <span class="block text-sm mt-1">Доставка не ранее {{ \Carbon\Carbon::parse($minDeliveryDate)->format('d.m.Y') }} в {{ $minDeliveryTime }}</span>
+                    <span class="block mt-1">Доставка не ранее {{ \Carbon\Carbon::parse($minDeliveryDate)->format('d.m.Y') }} в {{ $minDeliveryTime }}</span>
                 @endif
                 @if(isset($pickupReadyAt))
-                    <span class="block text-sm mt-1">Самовывоз не ранее {{ $pickupReadyAt->format('d.m.Y в H:i') }}</span>
+                    <span class="block mt-1">Самовывоз не ранее {{ $pickupReadyAt->format('d.m.Y в H:i') }}</span>
                 @endif
             </div>
         @endif
 
         {{-- Состав заказа --}}
-        <div class="bg-white p-6 rounded-2xl shadow mb-6">
-            <h2 class="text-xl font-semibold mb-3">Состав заказа</h2>
+        <div class="bg-white p-3 rounded-2xl shadow mb-3">
+            <h2 class="text-base font-semibold mb-2">Состав заказа</h2>
             @foreach($cartItems as $item)
-                <div class="flex justify-between py-2 border-b">
+                <div class="flex justify-between py-1.5 border-b text-sm">
                     <span>{{ $item->product->name }} × {{ $item->quantity }}</span>
                     <span>{{ $item->product->price * $item->quantity }} ₽</span>
                 </div>
             @endforeach
-            <div class="flex justify-between font-bold text-lg mt-2">
+            <div class="flex justify-between font-semibold mt-2 text-sm">
                 <span>Товары</span>
                 <span>{{ $total }} ₽</span>
             </div>
-            <div class="flex justify-between text-lg mt-1">
+            <div class="flex justify-between text-sm mt-1">
                 <span>Доставка</span>
                 <span>{{ $deliveryCost }} ₽</span>
             </div>
-            <div class="flex justify-between font-bold text-xl mt-2">
+            <div class="flex justify-between font-bold text-base mt-1">
                 <span>Итого</span>
                 <span>{{ $total + $deliveryCost }} ₽</span>
             </div>
         </div>
 
         {{-- Контактные данные --}}
-        <div class="bg-white p-6 rounded-2xl shadow mb-6">
-            <h2 class="text-xl font-semibold mb-3">Контактные данные</h2>
-            <div class="mb-4">
+        <div class="bg-white p-3 rounded-2xl shadow mb-3">
+            <h2 class="text-base font-semibold mb-2">Контактные данные</h2>
+            <div class="mb-2">
                 <label class="block text-sm font-medium mb-1">Номер телефона *</label>
                 <input type="tel" name="phone" id="phone-input" value="{{ old('phone') }}" 
-                       class="w-full border rounded p-2" placeholder="+7 (___) ___-__-__" required>
+                       class="w-full border rounded p-2 text-sm" placeholder="+7 (___) ___-__-__" required>
             </div>
-            <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-3 mb-2">
                 <button type="button" @click="callbackNeeded = !callbackNeeded"
-                        class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none"
+                        class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none flex-shrink-0"
                         :class="callbackNeeded ? 'bg-amber-600' : 'bg-gray-300'">
-                    <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out"
-                          :class="callbackNeeded ? 'translate-x-6' : 'translate-x-1'"></span>
+                    <span class="inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform duration-200 ease-in-out"
+                          :class="callbackNeeded ? 'translate-x-4' : 'translate-x-0.5'"></span>
                 </button>
-                <span class="text-sm font-medium">Перезвонить для подтверждения заказа</span>
+                <span class="text-sm">Перезвонить для подтверждения</span>
                 <input type="hidden" name="callback_needed" :value="callbackNeeded ? 1 : 0">
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1">Способ оплаты *</label>
+                <div class="flex items-center gap-4">
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="radio" name="payment_method" value="cash" {{ old('payment_method') == 'cash' ? 'checked' : '' }} class="text-amber-600">
+                        <span>Наличные</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="radio" name="payment_method" value="qr" {{ old('payment_method') == 'qr' ? 'checked' : '' }} class="text-amber-600">
+                        <span>QR-код</span>
+                    </label>
+                </div>
+                @error('payment_method')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
             </div>
         </div>
 
-        <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-8 rounded-full shadow-lg w-full sm:w-auto">
+        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-full shadow-md transition">
             Подтвердить заказ
         </button>
 
         {{-- Модальное окно карты --}}
-<div x-cloak x-show="showNewAddressModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-50" x-transition @click.away="showNewAddressModal = false">
-    <div class="bg-white rounded-2xl w-full max-w-md p-4 mx-2 max-h-screen overflow-auto shadow-2xl">
-        <h3 class="text-lg font-bold mb-2">Укажите адрес на карте</h3>
-        <div id="map" style="height: 220px;" class="rounded-lg border mb-2"></div>
-        <p class="text-xs text-gray-500 mb-2">Перетащите метку или кликните по карте</p>
-        
-        <div class="grid grid-cols-2 gap-2">
-            <div>
-                <label class="block text-xs text-gray-600 mb-0.5">Улица</label>
-                <input type="text" x-model="newAddress.street" class="w-full border border-gray-200 rounded-lg px-2 py-1 text-xs bg-gray-50" readonly>
-            </div>
-            <div>
-                <label class="block text-xs text-gray-600 mb-0.5">Дом</label>
-                <input type="text" x-model="newAddress.house" class="w-full border border-gray-200 rounded-lg px-2 py-1 text-xs bg-gray-50" readonly>
-            </div>
-            <div>
-                <label class="block text-xs text-gray-600 mb-0.5">Подъезд</label>
-                <input type="text" x-model="newAddress.entrance" class="w-full border border-gray-200 rounded-lg px-2 py-1 text-xs focus:ring-amber-500 focus:border-amber-500">
-            </div>
-            <div>
-                <label class="block text-xs text-gray-600 mb-0.5">Квартира</label>
-                <input type="text" x-model="newAddress.apartment" class="w-full border border-gray-200 rounded-lg px-2 py-1 text-xs focus:ring-amber-500 focus:border-amber-500">
-            </div>
-            <div class="col-span-2">
-                <label class="block text-xs text-gray-600 mb-0.5">Домофон</label>
-                <input type="text" x-model="newAddress.intercom" class="w-full border border-gray-200 rounded-lg px-2 py-1 text-xs focus:ring-amber-500 focus:border-amber-500" placeholder="Код или номер">
+        <div x-cloak x-show="showNewAddressModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-50" x-transition @click.away="showNewAddressModal = false">
+            <div class="bg-white rounded-2xl w-full max-w-md p-4 mx-2 max-h-screen overflow-auto shadow-2xl">
+                <h3 class="text-lg font-bold mb-2">Укажите адрес на карте</h3>
+                <div id="map" style="height: 220px;" class="rounded-lg border mb-2"></div>
+                <p class="text-xs text-gray-500 mb-2">Перетащите метку или кликните по карте</p>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs text-gray-600 mb-0.5">Улица</label>
+                        <input type="text" x-model="newAddress.street" class="w-full border border-gray-200 rounded-lg px-2 py-1 text-xs bg-gray-50" readonly>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-600 mb-0.5">Дом</label>
+                        <input type="text" x-model="newAddress.house" class="w-full border border-gray-200 rounded-lg px-2 py-1 text-xs bg-gray-50" readonly>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-600 mb-0.5">Подъезд</label>
+                        <input type="text" x-model="newAddress.entrance" class="w-full border border-gray-200 rounded-lg px-2 py-1 text-xs focus:ring-amber-500 focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-600 mb-0.5">Квартира</label>
+                        <input type="text" x-model="newAddress.apartment" class="w-full border border-gray-200 rounded-lg px-2 py-1 text-xs focus:ring-amber-500 focus:border-amber-500">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-xs text-gray-600 mb-0.5">Домофон</label>
+                        <input type="text" x-model="newAddress.intercom" class="w-full border border-gray-200 rounded-lg px-2 py-1 text-xs focus:ring-amber-500 focus:border-amber-500" placeholder="Код или номер">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 mt-3">
+                    <button type="button" @click="showNewAddressModal = false" class="px-3 py-1.5 text-xs border border-gray-300 rounded-full hover:bg-gray-50 transition">Отмена</button>
+                    <button type="button" @click="saveNewAddress()" class="px-4 py-1.5 text-xs bg-amber-500 text-white rounded-full hover:bg-amber-600 transition shadow-sm">Сохранить</button>
+                </div>
             </div>
         </div>
-        <div class="flex justify-end gap-2 mt-3">
-            <button type="button" @click="showNewAddressModal = false" class="px-3 py-1.5 text-xs border border-gray-300 rounded-full hover:bg-gray-50 transition">Отмена</button>
-            <button type="button" @click="saveNewAddress()" class="px-4 py-1.5 text-xs bg-amber-500 text-white rounded-full hover:bg-amber-600 transition shadow-sm">Сохранить</button>
-        </div>
-    </div>
-</div>
     </form>
 @endsection
 

@@ -114,10 +114,12 @@ class OrderController extends Controller
             'delivery_address_id' => 'nullable',
             'phone' => ['required', 'string', 'max:20', 'regex:/^\+7\s\(\d{3}\)\s\d{3}-\d{2}-\d{2}$/'],
             'callback_needed' => 'boolean',
+            'payment_method' => 'required|in:cash,qr',
             'delivery_date' => 'nullable|date|after_or_equal:today',
             'delivery_time' => 'nullable|date_format:H:i',
         ], [
             'phone.regex' => 'Введите номер в формате +7 (999) 999-99-99',
+            'payment_method.required' => 'Выберите способ оплаты',
         ]);
 
         $cartItems = CartItem::with('product')->where('user_id', auth()->id())->get();
@@ -204,6 +206,7 @@ class OrderController extends Controller
             'delivery_address_id' => $deliveryAddressId,
             'phone' => $request->phone,
             'callback_needed' => $request->boolean('callback_needed'),
+            'payment_method' => $request->payment_method,
             'delivery_date' => $request->delivery_date,
             'delivery_time' => $request->delivery_time,
             'status' => 'new',

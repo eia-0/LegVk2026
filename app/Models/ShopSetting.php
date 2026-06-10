@@ -25,6 +25,8 @@ class ShopSetting extends Model
 
     public static function getSettings()
     {
-        return self::firstOrFail();
+        return cache()->rememberForever('shop_settings', function () {
+            return self::firstOrFail();
+        });
     }
 }

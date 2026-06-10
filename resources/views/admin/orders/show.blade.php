@@ -1,4 +1,5 @@
 @extends('admin.layout')
+
 @section('admin-content')
     <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow p-6">
         <div class="flex items-center justify-between mb-4">
@@ -61,14 +62,29 @@
         </form>
 
         <table class="w-full mt-4">
-            <thead><tr><th>Товар</th><th>Цена</th><th>Кол-во</th><th>Сумма</th></tr></thead>
+            <thead>
+                <tr>
+                    <th class="p-3 text-left">Товар</th>
+                    <th class="p-3 text-left">Цена</th>
+                    <th class="p-3 text-center">Кол-во</th>
+                    <th class="p-3 text-right">Сумма</th>
+                </tr>
+            </thead>
             <tbody>
                 @foreach($order->items as $item)
-                <tr>
-                    <td>{{ $item->product->name }}</td>
-                    <td>{{ $item->price }} ₽</td>
-                    <td>{{ $item->quantity }}</td>
-                    <td>{{ $item->price * $item->quantity }} ₽</td>
+                <tr class="border-t">
+                    <td class="p-3">
+                        @if($item->product)
+                            <a href="{{ route('product.show', $item->product) }}" class="text-amber-600 hover:underline font-medium">
+                                {{ $item->product->name }}
+                            </a>
+                        @else
+                            {{ $item->product->name ?? 'Товар удалён' }}
+                        @endif
+                    </td>
+                    <td class="p-3">{{ $item->price }} ₽</td>
+                    <td class="p-3 text-center">{{ $item->quantity }}</td>
+                    <td class="p-3 text-right">{{ $item->price * $item->quantity }} ₽</td>
                 </tr>
                 @endforeach
             </tbody>

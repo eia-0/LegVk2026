@@ -24,7 +24,7 @@ class CategoryController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'parent_id' => 'nullable|exists:categories,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // макс 5 МБ
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
         ]);
 
         $data = $request->only('name', 'parent_id');
@@ -32,6 +32,10 @@ class CategoryController extends Controller
             $data['image'] = $request->file('image')->store('categories', 'public');
         }
         Category::create($data);
+
+        // Сбрасываем кэш категорий
+        cache()->forget('home_categories');
+
         return redirect()->route('admin.categories.index')->with('success', 'Категория создана');
     }
 
@@ -51,13 +55,16 @@ class CategoryController extends Controller
 
         $data = $request->only('name', 'parent_id');
         if ($request->hasFile('image')) {
-            // Удаляем старое изображение, если есть
             if ($category->image) {
                 \Storage::disk('public')->delete($category->image);
             }
             $data['image'] = $request->file('image')->store('categories', 'public');
         }
         $category->update($data);
+
+        // Сбрасываем кэш категорий
+        cache()->forget('home_categories');
+
         return redirect()->route('admin.categories.index')->with('success', 'Категория обновлена');
     }
 
@@ -67,6 +74,10 @@ class CategoryController extends Controller
             \Storage::disk('public')->delete($category->image);
         }
         $category->delete();
+
+        // Сбрасываем кэш категорий
+        cache()->forget('home_categories');
+
         return redirect()->route('admin.categories.index')->with('success', 'Категория удалена');
     }
 }
