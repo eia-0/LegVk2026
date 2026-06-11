@@ -21,7 +21,7 @@
                         График работы: {{ $settings->opening_hours }}
                     </p>
                     <a href="{{ route('cooperation') }}" class="text-gray-700 hover:text-amber-600 font-medium text-xs underline underline-offset-2">
-                        Партнёрам
+                        Партнерам
                     </a>
                 </div>
             @endif
@@ -95,7 +95,7 @@
     {{-- Категории --}}
     <div class="mb-8">
         <h2 class="text-2xl font-bold text-gray-800 mb-6">Категории</h2>
-        <div class="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4">
+        <div class="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-5 gap-1 sm:gap-4">
             @foreach($categories as $cat)
                 @php
                     $catImage = $cat->image 
@@ -170,6 +170,7 @@
                 <select name="sort" onchange="this.form.submit()" 
                         class="w-full sm:w-44 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-amber-500 focus:border-amber-500">
                     <option value="">По умолчанию</option>
+                    <option value="own" {{ $currentSort == 'own' ? 'selected' : '' }}>Только ЛегендаВкуса</option>
                     <option value="price_asc" {{ $currentSort == 'price_asc' ? 'selected' : '' }}>Цена: по возрастанию</option>
                     <option value="price_desc" {{ $currentSort == 'price_desc' ? 'selected' : '' }}>Цена: по убыванию</option>
                     <option value="name_asc" {{ $currentSort == 'name_asc' ? 'selected' : '' }}>Название: А → Я</option>
@@ -190,7 +191,7 @@
                          class="w-full h-28 sm:h-48 object-cover rounded-t-2xl" alt="{{ $product->name }}" loading="lazy">
                     @if($product->partner_id)
                         <div class="absolute bottom-2 right-2 bg-white rounded-full w-6 h-6 flex items-center justify-center shadow">
-                            <img src="{{ asset('images/p.svg') }}" alt="Партнёр" class="w-4 h-4">
+                            <img src="{{ asset('images/p.svg') }}" alt="Партнер" class="w-4 h-4">
                         </div>
                     @endif
                 </a>
@@ -254,6 +255,31 @@
                     @endauth
                 </div>
             </div>
+
+            {{-- Баннер только один раз после 6-го товара (мобильные) --}}
+            @if($loop->iteration == 6)
+                @php
+                    $banners = \App\Models\Banner::where('active', true)->orderBy('order')->get();
+                @endphp
+                @if($banners->isNotEmpty())
+                    <div class="max-[639px]:block hidden col-span-2 my-1">
+                        @if($banners->count() == 1 || $banners->first()->interval == 0)
+                            <a href="#" class="block">
+                                <img src="{{ $banners->first()->image_url }}" class="w-full h-[60px] object-cover rounded-xl" alt="Реклама">
+                            </a>
+                        @else
+                            <div x-data="{ active: 0, banners: {{ json_encode($banners->map(fn($b) => $b->image_url)) }}, interval: null }"
+                                 x-init="interval = setInterval(() => { active = (active + 1) % banners.length }, {{ $banners->first()->interval * 1000 }})"
+                                 class="relative overflow-hidden rounded-xl h-[60px]">
+                                <template x-for="(banner, index) in banners" :key="index">
+                                    <img :src="banner" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+                                         :class="active === index ? 'opacity-100' : 'opacity-0'">
+                                </template>
+                            </div>
+                        @endif
+                    </div>
+                @endif
+            @endif
         @empty
             <p class="text-gray-500 col-span-full text-center py-12">Товары не найдены.</p>
         @endforelse

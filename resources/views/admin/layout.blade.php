@@ -10,7 +10,8 @@
                 <li><a href="{{ route('admin.dashboard') }}" class="block py-1 hover:text-amber-600">Главная</a></li>
                 <li><a href="{{ route('admin.categories.index') }}" class="block py-1 hover:text-amber-600">Категории</a></li>
                 <li><a href="{{ route('admin.products.index') }}" class="block py-1 hover:text-amber-600">Товары</a></li>
-                <li><a href="{{ route('admin.partners.index') }}" class="block py-1 hover:text-amber-600">Партнёры</a></li>
+                <li><a href="{{ route('admin.partners.index') }}" class="block py-1 hover:text-amber-600">Партнеры</a></li>
+                <li><a href="{{ route('admin.banners.index') }}" class="block py-1 hover:text-amber-600">Реклама</a></li>
                 <li class="relative">
                     <a href="{{ route('admin.orders.index') }}" class="block py-1 hover:text-amber-600">Заказы</a>
                     <span x-cloak x-show="unseenCount > 0" x-text="unseenCount"

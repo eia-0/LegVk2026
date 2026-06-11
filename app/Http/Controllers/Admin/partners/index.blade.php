@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
 @section('admin-content')
-    <h1 class="text-2xl font-bold mb-4">Партнёры</h1>
+    <h1 class="text-2xl font-bold mb-4">Партнеры</h1>
     <a href="{{ route('admin.partners.create') }}" class="inline-block bg-amber-500 text-white px-4 py-2 rounded-full mb-4">Добавить партнёра</a>
     <div class="bg-white rounded-xl shadow overflow-x-auto">
         <table class="w-full">

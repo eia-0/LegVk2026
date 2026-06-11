@@ -10,16 +10,17 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ShopSettingController;
 use App\Http\Controllers\Admin\PartnerController;
+use App\Http\Controllers\Admin\BannerController;
 
 // Главная страница
 Route::get('/', function (Request $request) {
-    // Кэшируем категории на 1 час (3600 секунд)
     $categories = cache()->remember('home_categories', 3600, function () {
         return \App\Models\Category::with('children')->whereNull('parent_id')->get();
     });
 
     $productsQuery = \App\Models\Product::with('category');
 
+    // Фильтр по категории
     if ($request->has('category')) {
         $categoryId = $request->input('category');
         $category = \App\Models\Category::find($categoryId);
@@ -32,13 +33,19 @@ Route::get('/', function (Request $request) {
         }
     }
 
+    // Поиск по названию
     if ($request->filled('search')) {
         $search = $request->input('search');
         $productsQuery->where('name', 'like', "%{$search}%");
     }
 
+    // Сортировка
     $sort = $request->input('sort');
     switch ($sort) {
+        case 'own':
+            // Только товары магазина (без партнёров)
+            $productsQuery->whereNull('partner_id')->latest();
+            break;
         case 'price_asc':
             $productsQuery->orderBy('price', 'asc');
             break;
@@ -93,6 +100,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::post('partners/{partner}/products/{product}/reset-payout', [PartnerController::class, 'resetPayout'])
          ->name('partners.reset-payout');
     Route::resource('partners', PartnerController::class);
+    Route::resource('banners', BannerController::class)->except(['show']);
 
     Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('orders/unseen-count', [AdminOrderController::class, 'unseenCount'])->name('orders.unseen-count');
