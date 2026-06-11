@@ -18,6 +18,7 @@ class ProductController extends Controller
             $cartQuantity = $cartItem ? $cartItem->quantity : 0;
         }
         $product->load('partner', 'relatedProducts');
+        // Технология приготовления НЕ передаётся на публичную страницу
         return view('product.show', compact('product', 'cartQuantity'));
     }
 
@@ -47,9 +48,11 @@ class ProductController extends Controller
             'unlimited' => 'boolean',
             'partner_id' => 'nullable|exists:partners,id',
             'commission_percent' => 'nullable|integer|min:0|max:100',
+            'cooking_technology' => 'nullable|string',
         ]);
 
-        $data = $request->only('name', 'description', 'price', 'category_id', 'preparation_time', 'stock', 'unlimited', 'partner_id');
+        $data = $request->only('name', 'description', 'price', 'category_id', 'preparation_time', 'stock', 'unlimited', 'partner_id', 'cooking_technology');
+        // Если партнёр не выбран (магазин) – комиссия 0 и не сохраняется
         $data['commission_percent'] = $request->partner_id ? $request->commission_percent : null;
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('products', 'public');
@@ -91,9 +94,10 @@ class ProductController extends Controller
             'unlimited' => 'boolean',
             'partner_id' => 'nullable|exists:partners,id',
             'commission_percent' => 'nullable|integer|min:0|max:100',
+            'cooking_technology' => 'nullable|string',
         ]);
 
-        $data = $request->only('name', 'description', 'price', 'category_id', 'preparation_time', 'stock', 'unlimited', 'partner_id');
+        $data = $request->only('name', 'description', 'price', 'category_id', 'preparation_time', 'stock', 'unlimited', 'partner_id', 'cooking_technology');
         $data['commission_percent'] = $request->partner_id ? $request->commission_percent : null;
         if ($request->hasFile('image')) {
             if ($product->image) {

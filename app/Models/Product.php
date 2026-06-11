@@ -18,6 +18,7 @@ class Product extends Model
         'partner_id',
         'commission_percent',
         'payout_reset_at',
+        'cooking_technology', // <-- новое поле
     ];
 
     protected $casts = [

@@ -29,6 +29,15 @@
                 </p>
                 <p class="text-amber-600 text-xl font-semibold mt-2">{{ number_format($product->price, 2) }} ₽</p>
                 <p class="text-gray-600 text-sm mt-3">{{ $product->description }}</p>
+                
+                {{-- Технология приготовления (только для админа) --}}
+                @if(auth()->check() && auth()->user()->is_admin && $product->cooking_technology)
+                    <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                        <h3 class="text-sm font-semibold text-amber-800 mb-1">Технология приготовления</h3>
+                        <p class="text-sm text-gray-700">{{ $product->cooking_technology }}</p>
+                    </div>
+                @endif
+
                 <p class="mt-2 text-xs text-gray-400">Категория: {{ $product->category->name }}</p>
                 @if($product->preparation_time > 0)
                     <p class="mt-1 text-xs text-gray-400">⏱ ≈ {{ $product->preparation_time }} мин</p>

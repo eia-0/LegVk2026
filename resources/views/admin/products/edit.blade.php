@@ -13,7 +13,9 @@
         </div>
     @endif
 
-    <form action="{{ route('admin.products.update', $product) }}" method="POST" enctype="multipart/form-data" class="bg-white p-6 rounded-2xl shadow max-w-2xl">
+    <form action="{{ route('admin.products.update', $product) }}" method="POST" enctype="multipart/form-data"
+          x-data="{ partnerId: '{{ old('partner_id', $product->partner_id) }}' }"
+          class="bg-white p-6 rounded-2xl shadow max-w-2xl">
         @csrf @method('PUT')
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -38,20 +40,25 @@
             </div>
             <div>
                 <label class="block mb-1">Партнёр (если товар партнёрский)</label>
-                <select name="partner_id" class="w-full border rounded p-2">
+                <select name="partner_id" x-model="partnerId" class="w-full border rounded p-2">
                     <option value="">— Магазин —</option>
                     @foreach($partners as $partner)
                         <option value="{{ $partner->id }}" {{ old('partner_id', $product->partner_id) == $partner->id ? 'selected' : '' }}>{{ $partner->full_name }}</option>
                     @endforeach
                 </select>
             </div>
-            <div>
+            <div x-show="partnerId !== ''" x-cloak>
                 <label class="block mb-1">Комиссия магазина (%)</label>
                 <input type="number" name="commission_percent" value="{{ old('commission_percent', $product->commission_percent ?? 10) }}" min="0" max="100" step="1" class="w-full border rounded p-2" placeholder="10">
             </div>
             <div class="md:col-span-2">
                 <label class="block mb-1">Описание</label>
                 <textarea name="description" rows="3" class="w-full border rounded p-2">{{ old('description', $product->description) }}</textarea>
+            </div>
+            {{-- Поле "Технология приготовления" только для товаров магазина --}}
+            <div class="md:col-span-2" x-show="partnerId === ''" x-cloak>
+                <label class="block mb-1">Технология приготовления</label>
+                <textarea name="cooking_technology" rows="3" class="w-full border rounded p-2">{{ old('cooking_technology', $product->cooking_technology) }}</textarea>
             </div>
             <div>
                 <label class="block mb-1">Категория</label>
@@ -84,7 +91,7 @@
                         </label>
                     @endforeach
                 </div>
-                <p class="text-xs text-gray-500 mt-1">Отмеченные товары появятся в блоке «С этим также берут». Порядок соответствует порядку установки галочек.</p>
+                <p class="text-xs text-gray-500 mt-1">Отмеченные товары появятся в блоке «С этим также берут».</p>
             </div>
         </div>
         <button type="submit" class="mt-4 bg-amber-500 text-white px-6 py-2 rounded-full">Обновить</button>

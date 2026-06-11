@@ -7,12 +7,34 @@ use App\Models\Partner;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
+
 class PartnerController extends Controller
 {
     public function index()
     {
         $partners = Partner::withCount('products')->paginate(20);
-        return view('admin.partners.index', compact('partners'));
+
+        // Статистика по товарам магазина (без партнёра)
+        $storeProducts = Product::whereNull('partner_id')->get();
+        $storeTotalSold = $storeProducts->sum(function ($product) {
+            return $product->orderItems()
+                ->whereHas('order', fn($q) => $q->where('status', '!=', 'cancelled'))
+                ->sum('quantity');
+        });
+        $storeTotalSales = $storeProducts->sum(function ($product) {
+            $sold = $product->orderItems()
+                ->whereHas('order', fn($q) => $q->where('status', '!=', 'cancelled'))
+                ->sum('quantity');
+            return $sold * $product->price;
+        });
+        $storeProductsCount = $storeProducts->count();
+
+        return view('admin.partners.index', compact(
+            'partners',
+            'storeProductsCount',
+            'storeTotalSold',
+            'storeTotalSales'
+        ));
     }
 
     public function create()
