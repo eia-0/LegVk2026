@@ -21,8 +21,16 @@
             <p><strong>Время доставки:</strong> {{ $order->delivery_time }}</p>
         @endif
         <p><strong>Телефон:</strong> {{ $order->phone ?? 'не указан' }}</p>
+        <p><strong>Способ оплаты:</strong> {{ $order->payment_method === 'cash' ? 'Наличные' : 'QR-код' }}</p>
         @if($order->callback_needed)
             <p class="text-amber-600 font-semibold">Требуется звонок</p>
+        @endif
+
+        {{-- Информация о курьере --}}
+        @if($order->courier)
+            <p><strong>Курьер:</strong> {{ $order->courier->name }} ({{ $order->courier->email }})
+               @if($order->courier->phone) — {{ $order->courier->phone }}@endif
+            </p>
         @endif
 
         <div id="cancel-reason" style="{{ $order->status === 'cancelled' && $order->cancellation_reason ? '' : 'display:none;' }}" class="text-red-600 font-semibold mt-2">

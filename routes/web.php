@@ -11,6 +11,9 @@ use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ShopSettingController;
 use App\Http\Controllers\Admin\PartnerController;
 use App\Http\Controllers\Admin\BannerController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\CourierController;
+use App\Http\Controllers\CourierProfileController;
 
 // Главная страница
 Route::get('/', function (Request $request) {
@@ -43,7 +46,6 @@ Route::get('/', function (Request $request) {
     $sort = $request->input('sort');
     switch ($sort) {
         case 'own':
-            // Только товары магазина (без партнёров)
             $productsQuery->whereNull('partner_id')->latest();
             break;
         case 'price_asc':
@@ -92,6 +94,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/order/{order}/status', [OrderController::class, 'status'])->name('orders.status');
 });
 
+// Курьерские маршруты
+Route::middleware(['auth', 'courier'])->group(function () {
+    Route::get('/courier', [CourierController::class, 'index'])->name('courier.index');
+    Route::post('/courier/{order}/accept', [CourierController::class, 'accept'])->name('courier.accept');
+    Route::patch('/courier/{order}/status', [CourierController::class, 'updateStatus'])->name('courier.updateStatus');
+    Route::get('/courier/profile', [CourierProfileController::class, 'edit'])->name('courier.profile.edit');
+    Route::patch('/courier/profile', [CourierProfileController::class, 'update'])->name('courier.profile.update');
+});
+
+// Админка
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -101,6 +113,10 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
          ->name('partners.reset-payout');
     Route::resource('partners', PartnerController::class);
     Route::resource('banners', BannerController::class)->except(['show']);
+
+    // Пользователи
+    Route::resource('users', UserController::class)->only(['index']);
+    Route::patch('users/{user}/role', [UserController::class, 'updateRole'])->name('users.role');
 
     Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('orders/unseen-count', [AdminOrderController::class, 'unseenCount'])->name('orders.unseen-count');

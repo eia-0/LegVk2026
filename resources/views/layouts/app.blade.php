@@ -56,6 +56,10 @@
                 <div class="hidden md:flex items-center space-x-4">
                     <a href="{{ route('home') }}" class="text-gray-700 hover:text-amber-600 font-medium">Каталог</a>
                     @auth
+                        @if(auth()->user()->role === 'courier')
+                            <a href="{{ route('courier.index') }}" class="text-gray-700 hover:text-amber-600 font-medium">Курьерская</a>
+                            <a href="{{ route('courier.profile.edit') }}" class="text-gray-700 hover:text-amber-600 font-medium">Профиль</a>
+                        @endif
                         <a href="{{ route('cart.index') }}" class="text-gray-700 hover:text-amber-600 relative font-medium">
                             Корзина
                             <span x-show="cartCount > 0" x-text="cartCount"
@@ -84,6 +88,9 @@
                 {{-- Мобильная навигация --}}
                 <div class="md:hidden flex items-center space-x-2">
                     @auth
+                        @if(auth()->user()->role === 'courier')
+                            <a href="{{ route('courier.index') }}" class="text-gray-700 text-sm font-medium">Курьерская</a>
+                        @endif
                         <div x-data="{ open: false }">
                             <button @click="open = !open" class="text-gray-700 focus:outline-none">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,6 +99,9 @@
                             </button>
                             <div x-show="open" @click.away="open = false" class="absolute right-4 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
                                 <a href="{{ route('home') }}" class="block px-4 py-2 text-gray-700">Каталог</a>
+                                @if(auth()->user()->role === 'courier')
+                                    <a href="{{ route('courier.profile.edit') }}" class="block px-4 py-2 text-gray-700">Профиль</a>
+                                @endif
                                 <a href="{{ route('cart.index') }}" class="block px-4 py-2">Корзина</a>
                                 <a href="{{ route('orders.index') }}" class="block px-4 py-2">Заказы</a>
                                 @if(auth()->user()->is_admin)

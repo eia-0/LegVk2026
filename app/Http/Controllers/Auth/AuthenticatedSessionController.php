@@ -28,7 +28,14 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // После успешного входа проверяем роль пользователя
+        $user = Auth::user();
+        if ($user->role === 'courier') {
+            return redirect()->intended(route('courier.index'));
+        }
+
+        // Для остальных — стандартный редирект на главную
+        return redirect()->intended(route('home'));
     }
 
     /**
@@ -39,7 +46,6 @@ class AuthenticatedSessionController extends Controller
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
         return redirect('/');

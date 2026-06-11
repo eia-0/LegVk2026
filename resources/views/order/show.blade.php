@@ -26,6 +26,9 @@
         @else
             <p class="text-gray-500">Звонок не требуется</p>
         @endif
+        @if($order->courier_name)
+            <p><strong>Курьер:</strong> {{ $order->courier_name }} ({{ $order->courier_phone }})</p>
+        @endif
 
         <div id="cancel-reason" style="{{ $order->status === 'cancelled' && $order->cancellation_reason ? '' : 'display:none;' }}" class="text-red-600 font-semibold mt-2">
             Причина отмены: <span>{{ $order->cancellation_reason }}</span>
