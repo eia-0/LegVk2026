@@ -12,6 +12,14 @@
         .category-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .product-card:hover { transform: scale(1.02); }
         .leaflet-container { height: 100%; width: 100%; }
+
+        /* Градиентный текст для названия */
+        .gradient-text {
+            background: linear-gradient(135deg, #d97706, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
     </style>
 </head>
 <body class="bg-amber-50 min-h-screen flex flex-col pb-16 md:pb-0"
@@ -47,8 +55,8 @@
                                 <img src="{{ asset('images/lvlogo.svg') }}" alt="ЛегендаВкуса" class="w-10 h-10 object-contain">
                             @endif
                         </div>
-                        <span class="hidden sm:inline text-xl font-bold text-amber-700 tracking-wide">ЛегендаВкуса</span>
-                        <span class="sm:hidden text-sm font-bold text-amber-700 tracking-wide">ЛегендаВкуса</span>
+                        <span class="hidden sm:inline text-xl font-bold tracking-wide gradient-text">ЛегендаВкуса</span>
+                        <span class="sm:hidden text-sm font-bold tracking-wide gradient-text">ЛегендаВкуса</span>
                     </a>
                 </div>
 
@@ -58,7 +66,6 @@
                     @auth
                         @if(auth()->user()->role === 'courier')
                             <a href="{{ route('courier.index') }}" class="text-gray-700 hover:text-amber-600 font-medium">Курьерская</a>
-                            <a href="{{ route('courier.profile.edit') }}" class="text-gray-700 hover:text-amber-600 font-medium">Профиль</a>
                         @endif
                         <a href="{{ route('cart.index') }}" class="text-gray-700 hover:text-amber-600 relative font-medium">
                             Корзина
@@ -99,9 +106,6 @@
                             </button>
                             <div x-show="open" @click.away="open = false" class="absolute right-4 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
                                 <a href="{{ route('home') }}" class="block px-4 py-2 text-gray-700">Каталог</a>
-                                @if(auth()->user()->role === 'courier')
-                                    <a href="{{ route('courier.profile.edit') }}" class="block px-4 py-2 text-gray-700">Профиль</a>
-                                @endif
                                 <a href="{{ route('cart.index') }}" class="block px-4 py-2">Корзина</a>
                                 <a href="{{ route('orders.index') }}" class="block px-4 py-2">Заказы</a>
                                 @if(auth()->user()->is_admin)

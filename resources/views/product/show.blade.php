@@ -27,7 +27,9 @@
                 <p class="text-sm text-gray-500 mt-1">
                     {{ $product->partner_id ? 'Товар партнера' : 'Товар магазина' }}
                 </p>
-                <p class="text-amber-600 text-xl font-semibold mt-2">{{ number_format($product->price, 2) }} ₽</p>
+                <p class="text-xl font-semibold mt-2 {{ $product->made_to_order ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-transparent bg-clip-text' : 'bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text' }}">
+                    {{ number_format($product->price, 2) }} ₽
+                </p>
                 <p class="text-gray-600 text-sm mt-3">{{ $product->description }}</p>
                 
                 {{-- Технология приготовления (только для админа) --}}
@@ -42,26 +44,50 @@
                 @if($product->preparation_time > 0)
                     <p class="mt-1 text-xs text-gray-400">⏱ ≈ {{ $product->preparation_time }} мин</p>
                 @endif
+
                 @auth
                     <div class="mt-4">
-                        <template x-if="inCart === 0">
-                            <div class="flex items-center space-x-3">
-                                <input type="number" x-model="quantity" value="1" min="1" class="w-14 border border-gray-300 rounded-lg px-2 py-1.5 text-sm">
-                                <button @click="addToCart({{ $product->id }}, quantity)" class="bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-5 rounded-full text-sm transition">
-                                    В корзину
-                                </button>
-                            </div>
-                        </template>
-                        <template x-if="inCart > 0">
-                            <div class="flex items-center space-x-3">
-                                <button @click="addToCart({{ $product->id }}, -1)" class="bg-gray-200 text-gray-700 rounded-full w-7 h-7 flex items-center justify-center text-sm">−</button>
-                                <span x-text="inCart" class="text-lg font-semibold w-6 text-center"></span>
-                                <button @click="addToCart({{ $product->id }}, 1)" class="bg-gray-200 text-gray-700 rounded-full w-7 h-7 flex items-center justify-center text-sm">+</button>
-                            </div>
-                        </template>
+                        @if($product->made_to_order)
+                            {{-- «Обсудить детали» янтарная --}}
+                            <a href="https://vk.com/legenda_vkusa" target="_blank"
+                               class="inline-block bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-medium py-2 px-6 rounded-full text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+                                Обсудить детали
+                            </a>
+                        @else
+                            {{-- «В корзину» фиолетово‑розовая --}}
+                            <template x-if="inCart === 0">
+                                <div class="flex items-center space-x-3">
+                                    <input type="number" x-model="quantity" value="1" min="1" class="w-14 border border-gray-300 rounded-lg px-2 py-1.5 text-sm">
+                                    <button @click="addToCart({{ $product->id }}, quantity)" class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium py-2 px-5 rounded-full text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+                                        В корзину
+                                    </button>
+                                </div>
+                            </template>
+                            <template x-if="inCart > 0">
+                                <div class="flex items-center space-x-3">
+                                    <div class="flex items-center space-x-1 bg-gradient-to-r from-purple-50 to-pink-50 rounded-full px-3 py-1 shadow-sm border border-purple-200">
+                                        <button @click="addToCart({{ $product->id }}, -1)" class="text-gray-700 rounded-full w-7 h-7 flex items-center justify-center bg-white/80 hover:bg-white transition">−</button>
+                                        <span x-text="inCart" class="text-lg font-semibold w-6 text-center text-purple-700"></span>
+                                        <button @click="addToCart({{ $product->id }}, 1)" class="text-gray-700 rounded-full w-7 h-7 flex items-center justify-center bg-white/80 hover:bg-white transition">+</button>
+                                    </div>
+                                </div>
+                            </template>
+                        @endif
                     </div>
                 @else
-                    <a href="{{ route('login') }}" class="mt-4 inline-block bg-amber-500 text-white py-2 px-5 rounded-full text-sm">Войти, чтобы купить</a>
+                    <div class="mt-4">
+                        @if($product->made_to_order)
+                            <a href="https://vk.com/legenda_vkusa" target="_blank"
+                               class="inline-block bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-medium py-2 px-6 rounded-full text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+                                Обсудить детали
+                            </a>
+                        @else
+                            <a href="{{ route('login') }}" 
+                               class="inline-block bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium py-2 px-6 rounded-full text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+                                Войти, чтобы купить
+                            </a>
+                        @endif
+                    </div>
                 @endauth
             </div>
         </div>

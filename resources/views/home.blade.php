@@ -3,7 +3,7 @@
 @section('title', 'Каталог - ЛегендаВкуса')
 
 @section('content')
-    <div class="mb-8">
+    <div class="mb-4 sm:mb-8">
         @php
             $settings = \App\Models\ShopSetting::getSettings();
             // Сохраняем текущие параметры запроса для использования в форме и ссылках
@@ -78,7 +78,7 @@
                 ->get();
         @endphp
         @if($activeOrders->isNotEmpty())
-            <div class="space-y-2 mb-6">
+            <div class="space-y-2 mb-4 sm:mb-6">
                 @foreach($activeOrders as $activeOrder)
                     <div class="bg-amber-50 border border-amber-200 rounded-2xl p-2 sm:p-3 flex items-center justify-between text-xs sm:text-sm">
                         <div class="flex items-center space-x-2 min-w-0">
@@ -93,8 +93,8 @@
     @endauth
 
     {{-- Категории --}}
-    <div class="mb-8">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">Категории</h2>
+    <div class="mb-4 sm:mb-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-3 sm:mb-6">Категории</h2>
         <div class="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-5 gap-1 sm:gap-4">
             @foreach($categories as $cat)
                 @php
@@ -122,10 +122,10 @@
             $currentCategoryModel = \App\Models\Category::find($currentCategory);
         @endphp
         @if($currentCategoryModel)
-            <div class="mb-8">
-                <h2 class="text-2xl font-bold text-amber-700">{{ $currentCategoryModel->name }}</h2>
+            <div class="mb-4 sm:mb-8">
+                <h2 class="text-2xl font-bold text-amber-700 mb-2 sm:mb-0">{{ $currentCategoryModel->name }}</h2>
                 @if($currentCategoryModel->children->count())
-                    <div class="flex flex-wrap gap-2 mt-3">
+                    <div class="flex flex-wrap gap-2 mt-2 sm:mt-3">
                         <span class="text-gray-600">Подкатегории:</span>
                         @foreach($currentCategoryModel->children as $sub)
                             <a href="{{ route('home', array_merge(request()->except('page'), ['category' => $sub->id])) }}" 
@@ -135,13 +135,13 @@
                         @endforeach
                     </div>
                 @endif
-                <a href="{{ route('home', request()->except('category', 'page')) }}" class="text-amber-600 underline text-sm mt-3 inline-block">← Сбросить фильтр категории</a>
+                <a href="{{ route('home', request()->except('category', 'page')) }}" class="text-amber-600 underline text-sm mt-2 sm:mt-3 inline-block">← Сбросить фильтр категории</a>
             </div>
         @endif
     @endif
 
     {{-- Заголовок товаров и панель поиска/сортировки --}}
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 sm:mb-6 gap-2 sm:gap-4">
         <h2 class="text-2xl font-bold text-gray-800">
             @if($currentCategory)
                 {{ $currentCategoryModel->name ?? 'Товары' }}
@@ -157,7 +157,9 @@
                 @endif
                 <input type="text" name="search" value="{{ $currentSearch }}" placeholder="Поиск по названию..." 
                        class="w-full sm:w-48 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-amber-500 focus:border-amber-500">
-                <button type="submit" class="ml-2 bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg text-sm transition">🔍</button>
+                <button type="submit" class="ml-2 bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg text-sm transition">
+                    <span class="text-gray-200">🔍</span>
+                </button>
             </form>
             {{-- Сортировка --}}
             <form action="{{ route('home') }}" method="GET" id="sort-form" class="flex">
@@ -202,56 +204,61 @@
                         <p class="text-xs text-gray-400 mt-0.5">⏱ ≈ {{ $product->preparation_time }} мин</p>
                     @endif
 
-                    {{-- Наличие и цена --}}
-                    <div class="mt-auto pt-2 flex items-center justify-between sm:flex-col sm:items-start sm:gap-1">
-                        <p class="text-xs sm:text-sm order-1 sm:order-2">
+                    {{-- Наличие и цена в одной строке --}}
+                    <div class="mt-auto pt-2 flex items-center justify-between">
+                        <p class="text-xs sm:text-sm">
                             @if($product->unlimited)
-                                <span class="text-green-600 font-semibold">В наличии</span>
+                                <span class="font-semibold bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text">В наличии</span>
                             @elseif($product->stock !== null && $product->stock > 0)
-                                <span class="text-green-600">В наличии: {{ $product->stock }} шт.</span>
+                                <span class="font-semibold bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text">В наличии: {{ $product->stock }} шт.</span>
+                            @elseif($product->made_to_order)
+                                <span class="font-semibold bg-gradient-to-r from-amber-500 to-orange-500 text-transparent bg-clip-text">Под заказ</span>
                             @else
-                                <span class="text-red-500">Нет в наличии</span>
+                                <span class="text-red-500 font-semibold">Нет в наличии</span>
                             @endif
                         </p>
-                        <span class="text-sm sm:text-xl text-amber-700 order-2 sm:order-1">
+                        <span class="text-sm sm:text-xl {{ $product->made_to_order ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-transparent bg-clip-text font-semibold' : 'bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text font-semibold' }}">
                             {{ number_format($product->price, 0) }} ₽
                         </span>
                     </div>
 
-                    {{-- Кнопка «В корзину» или счётчик --}}
+                    {{-- Кнопка «В корзину», «Обсудить детали» или «Войти» (на всю ширину) --}}
                     @auth
-                        <div class="mt-2 sm:mt-3">
-                            <div class="sm:hidden h-8 flex items-center justify-center">
+                        <div class="mt-2 sm:mt-3 w-full">
+                            @if($product->made_to_order)
+                                <a href="https://vk.com/legenda_vkusa" target="_blank"
+                                   class="block w-full text-center bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl text-xs sm:text-sm py-2 px-5 transition-all duration-200 font-semibold hover:-translate-y-0.5 hover:shadow-lg">
+                                    Обсудить детали
+                                </a>
+                            @else
                                 <template x-if="inCart > 0">
-                                    <div class="flex items-center justify-between w-full bg-gray-100 rounded-full px-3 h-full">
-                                        <button @click="addToCart({{ $product->id }}, -1)" class="text-gray-700 font-bold text-lg leading-none">−</button>
-                                        <span x-text="inCart" class="font-bold text-sm"></span>
-                                        <button @click="addToCart({{ $product->id }}, 1)" class="text-gray-700 font-bold text-lg leading-none">+</button>
+                                    <div class="flex items-center justify-between w-full bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl px-3 py-1 shadow-sm border border-purple-200">
+                                        <button @click="addToCart({{ $product->id }}, -1)" class="text-gray-700 font-bold text-lg leading-none w-7 h-7 flex items-center justify-center rounded-full bg-white/80 hover:bg-white transition">−</button>
+                                        <span x-text="inCart" class="font-bold text-sm sm:text-base text-purple-700"></span>
+                                        <button @click="addToCart({{ $product->id }}, 1)" class="text-gray-700 font-bold text-lg leading-none w-7 h-7 flex items-center justify-center rounded-full bg-white/80 hover:bg-white transition">+</button>
                                     </div>
                                 </template>
                                 <template x-if="inCart === 0">
-                                    <button @click="addToCart({{ $product->id }}, 1)" class="w-full h-full bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-full text-xs transition flex items-center justify-center">
+                                    <button @click="addToCart({{ $product->id }}, 1)" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl text-xs sm:text-sm py-2 px-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
                                         В корзину
                                     </button>
                                 </template>
-                            </div>
-                            <div class="hidden sm:flex items-center space-x-1">
-                                <template x-if="inCart > 0">
-                                    <div class="flex items-center space-x-1">
-                                        <button @click="addToCart({{ $product->id }}, -1)" class="bg-gray-200 text-gray-700 rounded-full w-7 h-7 flex items-center justify-center text-lg font-bold transition hover:bg-gray-300">−</button>
-                                        <span x-text="inCart" class="w-6 text-center font-bold"></span>
-                                        <button @click="addToCart({{ $product->id }}, 1)" class="bg-gray-200 text-gray-700 rounded-full w-7 h-7 flex items-center justify-center text-lg font-bold transition hover:bg-gray-300">+</button>
-                                    </div>
-                                </template>
-                                <template x-if="inCart === 0">
-                                    <button @click="addToCart({{ $product->id }}, 1)" class="bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-5 rounded-full text-sm transition">
-                                        В корзину
-                                    </button>
-                                </template>
-                            </div>
+                            @endif
                         </div>
                     @else
-                        <a href="{{ route('login') }}" class="sm:hidden h-8 flex items-center justify-center w-full bg-amber-500 text-white rounded-full text-xs mt-2">Войти</a>
+                        <div class="mt-2 sm:mt-3 w-full">
+                            @if($product->made_to_order)
+                                <a href="https://vk.com/legenda_vkusa" target="_blank"
+                                   class="block w-full text-center bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl text-xs sm:text-sm py-2 px-5 transition-all duration-200 font-semibold hover:-translate-y-0.5 hover:shadow-lg">
+                                    Обсудить детали
+                                </a>
+                            @else
+                                <a href="{{ route('login') }}" 
+                                   class="block w-full text-center bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl text-xs sm:text-sm py-2 px-5 transition-all duration-200 font-semibold hover:-translate-y-0.5 hover:shadow-lg">
+                                    Войти
+                                </a>
+                            @endif
+                        </div>
                     @endauth
                 </div>
             </div>
@@ -281,10 +288,10 @@
                 @endif
             @endif
         @empty
-            <p class="text-gray-500 col-span-full text-center py-12">Товары не найдены.</p>
+            <p class="text-gray-500 col-span-full text-center py-8 sm:py-12">Товары не найдены.</p>
         @endforelse
     </div>
-    <div class="mt-8">
+    <div class="mt-6 sm:mt-8">
         {{ $products->links() }}
     </div>
 @endsection

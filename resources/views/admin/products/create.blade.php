@@ -38,6 +38,10 @@
                 <input type="checkbox" name="unlimited" id="unlimited" value="1" {{ old('unlimited') ? 'checked' : '' }} class="text-amber-600">
                 <label for="unlimited">Всегда в наличии (неограниченно)</label>
             </div>
+            <div class="flex items-center space-x-2">
+                <input type="checkbox" name="made_to_order" id="made_to_order" value="1" {{ old('made_to_order') ? 'checked' : '' }} class="text-amber-600">
+                <label for="made_to_order">Под заказ</label>
+            </div>
             <div>
                 <label class="block mb-1">Партнёр (если товар партнёрский)</label>
                 <select name="partner_id" x-model="partnerId" class="w-full border rounded p-2">
@@ -55,7 +59,6 @@
                 <label class="block mb-1">Описание</label>
                 <textarea name="description" rows="3" class="w-full border rounded p-2">{{ old('description') }}</textarea>
             </div>
-            {{-- Поле "Технология приготовления" только для товаров магазина --}}
             <div class="md:col-span-2" x-show="partnerId === ''" x-cloak>
                 <label class="block mb-1">Технология приготовления</label>
                 <textarea name="cooking_technology" rows="3" class="w-full border rounded p-2">{{ old('cooking_technology') }}</textarea>

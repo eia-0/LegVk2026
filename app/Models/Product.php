@@ -15,16 +15,18 @@ class Product extends Model
         'preparation_time',
         'stock',
         'unlimited',
+        'made_to_order',
         'partner_id',
         'commission_percent',
         'payout_reset_at',
-        'cooking_technology', // <-- новое поле
+        'cooking_technology',
     ];
 
     protected $casts = [
-        'unlimited' => 'boolean',
+        'unlimited'          => 'boolean',
+        'made_to_order'      => 'boolean',
         'commission_percent' => 'integer',
-        'payout_reset_at' => 'datetime',
+        'payout_reset_at'    => 'datetime',
     ];
 
     public function category()
@@ -55,6 +57,9 @@ class Product extends Model
         }
     }
 
+    /**
+     * Продажи с момента последнего обнуления (payout_reset_at)
+     */
     public function soldSinceLastPayout(): int
     {
         return $this->orderItems()

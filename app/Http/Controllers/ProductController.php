@@ -18,7 +18,6 @@ class ProductController extends Controller
             $cartQuantity = $cartItem ? $cartItem->quantity : 0;
         }
         $product->load('partner', 'relatedProducts');
-        // Технология приготовления НЕ передаётся на публичную страницу
         return view('product.show', compact('product', 'cartQuantity'));
     }
 
@@ -46,28 +45,32 @@ class ProductController extends Controller
             'preparation_time' => 'nullable|integer|min:0',
             'stock' => 'nullable|integer|min:0',
             'unlimited' => 'boolean',
+            'made_to_order' => 'boolean',
             'partner_id' => 'nullable|exists:partners,id',
             'commission_percent' => 'nullable|integer|min:0|max:100',
             'cooking_technology' => 'nullable|string',
         ]);
 
-        $data = $request->only('name', 'description', 'price', 'category_id', 'preparation_time', 'stock', 'unlimited', 'partner_id', 'cooking_technology');
-        // Если партнёр не выбран (магазин) – комиссия 0 и не сохраняется
+        $data = $request->only(
+            'name', 'description', 'price', 'category_id', 'preparation_time',
+            'stock', 'unlimited', 'partner_id', 'cooking_technology', 'made_to_order'
+        );
         $data['commission_percent'] = $request->partner_id ? $request->commission_percent : null;
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('products', 'public');
         }
         $data['unlimited'] = $request->has('unlimited');
+        $data['made_to_order'] = $request->has('made_to_order');
+
         $product = Product::create($data);
-        
-        // Связанные товары при создании (если нужно)
+
         if ($request->has('related_products')) {
             $related = collect($request->related_products)->mapWithKeys(function ($id, $index) {
                 return [$id => ['order' => $index]];
             })->toArray();
             $product->relatedProducts()->sync($related);
         }
-        
+
         return redirect()->route('admin.products.index')->with('success', 'Товар добавлен');
     }
 
@@ -77,7 +80,7 @@ class ProductController extends Controller
         $partners = Partner::all();
         $allProducts = Product::where('id', '!=', $product->id)->orderBy('name')->get();
         $relatedIds = $product->relatedProducts()->pluck('related_product_id')->toArray();
-        
+
         return view('admin.products.edit', compact('product', 'categories', 'partners', 'allProducts', 'relatedIds'));
     }
 
@@ -92,12 +95,16 @@ class ProductController extends Controller
             'preparation_time' => 'nullable|integer|min:0',
             'stock' => 'nullable|integer|min:0',
             'unlimited' => 'boolean',
+            'made_to_order' => 'boolean',
             'partner_id' => 'nullable|exists:partners,id',
             'commission_percent' => 'nullable|integer|min:0|max:100',
             'cooking_technology' => 'nullable|string',
         ]);
 
-        $data = $request->only('name', 'description', 'price', 'category_id', 'preparation_time', 'stock', 'unlimited', 'partner_id', 'cooking_technology');
+        $data = $request->only(
+            'name', 'description', 'price', 'category_id', 'preparation_time',
+            'stock', 'unlimited', 'partner_id', 'cooking_technology', 'made_to_order'
+        );
         $data['commission_percent'] = $request->partner_id ? $request->commission_percent : null;
         if ($request->hasFile('image')) {
             if ($product->image) {
@@ -106,9 +113,10 @@ class ProductController extends Controller
             $data['image'] = $request->file('image')->store('products', 'public');
         }
         $data['unlimited'] = $request->has('unlimited');
+        $data['made_to_order'] = $request->has('made_to_order');
+
         $product->update($data);
 
-        // Синхронизация связанных товаров
         if ($request->has('related_products')) {
             $related = collect($request->related_products)->mapWithKeys(function ($id, $index) {
                 return [$id => ['order' => $index]];
