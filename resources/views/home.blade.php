@@ -2,11 +2,19 @@
 
 @section('title', 'Каталог - ЛегендаВкуса')
 
+@push('styles')
+    <style>
+        /* Отключаем прилипание шапки только на странице каталога */
+        nav.sticky {
+            position: static !important;
+        }
+    </style>
+@endpush
+
 @section('content')
     <div class="mb-4 sm:mb-8">
         @php
             $settings = \App\Models\ShopSetting::getSettings();
-            // Сохраняем текущие параметры запроса для использования в форме и ссылках
             $currentCategory = request('category');
             $currentSearch = request('search');
             $currentSort = request('sort');
@@ -185,6 +193,11 @@
     {{-- Товары --}}
     <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
         @forelse($products as $product)
+            @php
+                $isAvailable = $product->unlimited || ($product->stock !== null && $product->stock > 0);
+                $isMadeToOrder = $product->made_to_order;
+                $canPurchase = $isAvailable || $isMadeToOrder;
+            @endphp
             <div class="product-card bg-white rounded-2xl shadow-md overflow-hidden transition duration-300 flex flex-col"
                  x-data="{ inCart: {{ $cartQuantities[$product->id] ?? 0 }} }"
                  @product-cart-updated.window="if ($event.detail.productId == {{ $product->id }}) inCart = $event.detail.quantity">
@@ -199,67 +212,76 @@
                 </a>
                 <div class="p-2 sm:p-5 flex flex-col flex-1">
                     <h3 class="text-xs sm:text-lg font-bold text-gray-800 line-clamp-2 leading-tight">{{ $product->name }}</h3>
-                    <p class="text-xs text-gray-500 mt-0.5">{{ $product->category->name ?? '' }}</p>
-                    @if($product->preparation_time > 0)
-                        <p class="text-xs text-gray-400 mt-0.5">⏱ ≈ {{ $product->preparation_time }} мин</p>
-                    @endif
 
-                    {{-- Наличие и цена в одной строке --}}
+                    {{-- Категория и время приготовления в одной строке --}}
+                    <div class="flex justify-between items-center mt-0.5">
+                        <p class="text-xs text-gray-500">{{ $product->category->name ?? '' }}</p>
+                        @if($product->preparation_time > 0)
+                            <p class="text-xs text-gray-400">⏱ ≈ {{ $product->preparation_time }} мин</p>
+                        @endif
+                    </div>
+
+                    {{-- Наличие и цена --}}
                     <div class="mt-auto pt-2 flex items-center justify-between">
                         <p class="text-xs sm:text-sm">
                             @if($product->unlimited)
                                 <span class="font-semibold bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text">В наличии</span>
                             @elseif($product->stock !== null && $product->stock > 0)
                                 <span class="font-semibold bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text">В наличии: {{ $product->stock }} шт.</span>
-                            @elseif($product->made_to_order)
+                            @elseif($isMadeToOrder)
                                 <span class="font-semibold bg-gradient-to-r from-amber-500 to-orange-500 text-transparent bg-clip-text">Под заказ</span>
                             @else
                                 <span class="text-red-500 font-semibold">Нет в наличии</span>
                             @endif
                         </p>
-                        <span class="text-sm sm:text-xl {{ $product->made_to_order ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-transparent bg-clip-text font-semibold' : 'bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text font-semibold' }}">
+                        <span class="text-sm sm:text-xl {{ $isMadeToOrder ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-transparent bg-clip-text font-semibold' : 'bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text font-semibold' }}">
                             {{ number_format($product->price, 0) }} ₽
                         </span>
                     </div>
 
-                    {{-- Кнопка «В корзину», «Обсудить детали» или «Войти» (на всю ширину) --}}
-                    @auth
-                        <div class="mt-2 sm:mt-3 w-full">
-                            @if($product->made_to_order)
-                                <a href="https://vk.com/legenda_vkusa" target="_blank"
-                                   class="block w-full text-center bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl text-xs sm:text-sm py-2 px-5 transition-all duration-200 font-semibold hover:-translate-y-0.5 hover:shadow-lg">
-                                    Обсудить детали
-                                </a>
+                    {{-- Кнопки --}}
+                    <div class="mt-2 sm:mt-3 w-full">
+                        @if($canPurchase)
+                            @auth
+                                @if($isMadeToOrder)
+                                    <a href="https://vk.com/legenda_vkusa" target="_blank"
+                                       class="block w-full text-center bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl text-xs sm:text-sm py-2 px-5 transition-all duration-200 font-semibold hover:-translate-y-0.5 hover:shadow-lg">
+                                        Обсудить детали
+                                    </a>
+                                @else
+                                    <template x-if="inCart > 0">
+                                        <div class="flex items-center justify-between w-full bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl px-3 py-1 shadow-sm border border-purple-200">
+                                            <button @click="addToCart({{ $product->id }}, -1)" class="text-gray-700 font-bold text-lg leading-none w-7 h-7 flex items-center justify-center rounded-full bg-white/80 hover:bg-white transition">−</button>
+                                            <span x-text="inCart" class="font-bold text-sm sm:text-base text-purple-700"></span>
+                                            <button @click="addToCart({{ $product->id }}, 1)" class="text-gray-700 font-bold text-lg leading-none w-7 h-7 flex items-center justify-center rounded-full bg-white/80 hover:bg-white transition">+</button>
+                                        </div>
+                                    </template>
+                                    <template x-if="inCart === 0">
+                                        <button @click="addToCart({{ $product->id }}, 1)" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl text-xs sm:text-sm py-2 px-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+                                            В корзину
+                                        </button>
+                                    </template>
+                                @endif
                             @else
-                                <template x-if="inCart > 0">
-                                    <div class="flex items-center justify-between w-full bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl px-3 py-1 shadow-sm border border-purple-200">
-                                        <button @click="addToCart({{ $product->id }}, -1)" class="text-gray-700 font-bold text-lg leading-none w-7 h-7 flex items-center justify-center rounded-full bg-white/80 hover:bg-white transition">−</button>
-                                        <span x-text="inCart" class="font-bold text-sm sm:text-base text-purple-700"></span>
-                                        <button @click="addToCart({{ $product->id }}, 1)" class="text-gray-700 font-bold text-lg leading-none w-7 h-7 flex items-center justify-center rounded-full bg-white/80 hover:bg-white transition">+</button>
-                                    </div>
-                                </template>
-                                <template x-if="inCart === 0">
-                                    <button @click="addToCart({{ $product->id }}, 1)" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl text-xs sm:text-sm py-2 px-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
-                                        В корзину
-                                    </button>
-                                </template>
-                            @endif
-                        </div>
-                    @else
-                        <div class="mt-2 sm:mt-3 w-full">
-                            @if($product->made_to_order)
-                                <a href="https://vk.com/legenda_vkusa" target="_blank"
-                                   class="block w-full text-center bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl text-xs sm:text-sm py-2 px-5 transition-all duration-200 font-semibold hover:-translate-y-0.5 hover:shadow-lg">
-                                    Обсудить детали
-                                </a>
-                            @else
-                                <a href="{{ route('login') }}" 
-                                   class="block w-full text-center bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl text-xs sm:text-sm py-2 px-5 transition-all duration-200 font-semibold hover:-translate-y-0.5 hover:shadow-lg">
-                                    Войти
-                                </a>
-                            @endif
-                        </div>
-                    @endauth
+                                @if($isMadeToOrder)
+                                    <a href="https://vk.com/legenda_vkusa" target="_blank"
+                                       class="block w-full text-center bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl text-xs sm:text-sm py-2 px-5 transition-all duration-200 font-semibold hover:-translate-y-0.5 hover:shadow-lg">
+                                        Обсудить детали
+                                    </a>
+                                @else
+                                    <a href="{{ route('login') }}" 
+                                       class="block w-full text-center bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl text-xs sm:text-sm py-2 px-5 transition-all duration-200 font-semibold hover:-translate-y-0.5 hover:shadow-lg">
+                                        Войти
+                                    </a>
+                                @endif
+                            @endauth
+                        @else
+                            {{-- Неактивная кнопка "Нет в наличии" --}}
+                            <span class="block w-full text-center bg-gradient-to-r from-purple-500/50 to-pink-500/50 text-white rounded-xl text-xs sm:text-sm py-2 px-5 font-semibold cursor-not-allowed">
+                                Нет в наличии
+                            </span>
+                        @endif
+                    </div>
                 </div>
             </div>
 

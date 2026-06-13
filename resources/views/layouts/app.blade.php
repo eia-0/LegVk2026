@@ -13,7 +13,6 @@
         .product-card:hover { transform: scale(1.02); }
         .leaflet-container { height: 100%; width: 100%; }
 
-        /* Градиентный текст для названия */
         .gradient-text {
             background: linear-gradient(135deg, #d97706, #f59e0b);
             -webkit-background-clip: text;
@@ -42,7 +41,7 @@
         }
     @endphp
 
-    {{-- Верхняя навигация --}}
+    {{-- Верхняя навигация (sticky) --}}
     <nav class="bg-white shadow-md sticky top-0 z-40">
         <div class="container mx-auto px-2.5 sm:px-6 lg:px-8">
             <div class="flex justify-between h-14 items-center">
