@@ -21,6 +21,17 @@
                         <img src="{{ asset('images/p.svg') }}" alt="Партнёр" class="w-5 h-5">
                     </div>
                 @endif
+                {{-- Плашки характеристик --}}
+                @if($product->characteristics->isNotEmpty())
+                    <div class="absolute bottom-3 left-3 flex flex-wrap gap-1 z-10">
+                        @foreach($product->characteristics->sortBy('order') as $characteristic)
+                            <span class="text-white text-xs px-2 py-1 rounded-md leading-tight"
+                                  style="background-color: {{ $characteristic->color }}">
+                                {{ $characteristic->icon }} {{ $characteristic->name }}
+                            </span>
+                        @endforeach
+                    </div>
+                @endif
             </div>
             <div class="md:w-1/2">
                 <h1 class="text-2xl font-bold text-gray-800">{{ $product->name }}</h1>

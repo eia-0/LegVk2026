@@ -17,7 +17,8 @@ class ProductController extends Controller
                 ->where('product_id', $product->id)->first();
             $cartQuantity = $cartItem ? $cartItem->quantity : 0;
         }
-        $product->load('partner', 'relatedProducts');
+        // Подгружаем характеристики, чтобы плашки отображались на странице товара
+        $product->load('partner', 'relatedProducts', 'characteristics');
         return view('product.show', compact('product', 'cartQuantity'));
     }
 
@@ -46,7 +47,6 @@ class ProductController extends Controller
             'stock' => 'nullable|integer|min:0',
             'unlimited' => 'boolean',
             'made_to_order' => 'boolean',
-            // 'ready_to_eat' убрано
             'partner_id' => 'nullable|exists:partners,id',
             'commission_percent' => 'nullable|integer|min:0|max:100',
             'cooking_technology' => 'nullable|string',
@@ -62,9 +62,15 @@ class ProductController extends Controller
         }
         $data['unlimited'] = $request->has('unlimited');
         $data['made_to_order'] = $request->has('made_to_order');
-        // ready_to_eat не изменяем
 
         $product = Product::create($data);
+
+        // Синхронизация характеристик (теперь работает и при создании)
+        if ($request->has('characteristics')) {
+            $product->characteristics()->sync($request->characteristics);
+        } else {
+            $product->characteristics()->detach();
+        }
 
         if ($request->has('related_products')) {
             $related = collect($request->related_products)->mapWithKeys(function ($id, $index) {
@@ -85,7 +91,6 @@ class ProductController extends Controller
 
         $characteristics = \App\Models\Characteristic::orderBy('order')->get();
         return view('admin.products.edit', compact('product', 'categories', 'partners', 'allProducts', 'relatedIds', 'characteristics'));
-
     }
 
     public function update(Request $request, Product $product)
@@ -100,7 +105,6 @@ class ProductController extends Controller
             'stock' => 'nullable|integer|min:0',
             'unlimited' => 'boolean',
             'made_to_order' => 'boolean',
-            // 'ready_to_eat' убрано
             'partner_id' => 'nullable|exists:partners,id',
             'commission_percent' => 'nullable|integer|min:0|max:100',
             'cooking_technology' => 'nullable|string',
@@ -131,6 +135,7 @@ class ProductController extends Controller
             $product->relatedProducts()->detach();
         }
 
+        // Синхронизация характеристик
         if ($request->has('characteristics')) {
             $product->characteristics()->sync($request->characteristics);
         } else {

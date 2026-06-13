@@ -212,10 +212,12 @@
                             <img src="{{ asset('images/p.svg') }}" alt="Партнер" class="w-4 h-4">
                         </div>
                     @endif
+                    {{-- Плашки характеристик --}}
                     @if($product->characteristics->isNotEmpty())
-                        <div class="absolute bottom-2 left-2 flex flex-wrap gap-1">
+                        <div class="absolute bottom-2 left-2 flex flex-wrap gap-1 z-10">
                             @foreach($product->characteristics->sortBy('order') as $characteristic)
-                                <span class="text-white text-xs px-1.5 py-0.5 rounded-md" style="background-color: {{ $characteristic->color }}">
+                                <span class="text-white text-xs px-1.5 py-0.5 rounded-md leading-tight"
+                                      style="background-color: {{ $characteristic->color }}">
                                     {{ $characteristic->icon }} {{ $characteristic->name }}
                                 </span>
                             @endforeach
