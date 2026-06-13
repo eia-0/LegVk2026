@@ -33,6 +33,19 @@
             <input type="file" name="image" class="w-full border rounded p-2">
             <p class="text-xs text-gray-500 mt-1">Рекомендуется квадратное изображение.</p>
         </div>
+        <div class="mb-4">
+            <label class="block mb-2 font-medium">Показывать в разделах:</label>
+            <div class="space-y-2">
+                <label class="flex items-center space-x-2">
+                    <input type="checkbox" name="show_in_catalog" value="1" {{ old('show_in_catalog', true) ? 'checked' : '' }} class="text-amber-600">
+                    <span>Еда</span>
+                </label>
+                <label class="flex items-center space-x-2">
+                    <input type="checkbox" name="show_in_ready_eat" value="1" {{ old('show_in_ready_eat') ? 'checked' : '' }} class="text-amber-600">
+                    <span>Продукты и товары</span>
+                </label>
+            </div>
+        </div>
         <button type="submit" class="bg-amber-500 text-white px-6 py-2 rounded-full">Создать</button>
     </form>
 @endsection

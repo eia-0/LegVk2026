@@ -46,6 +46,7 @@ class ProductController extends Controller
             'stock' => 'nullable|integer|min:0',
             'unlimited' => 'boolean',
             'made_to_order' => 'boolean',
+            // 'ready_to_eat' убрано
             'partner_id' => 'nullable|exists:partners,id',
             'commission_percent' => 'nullable|integer|min:0|max:100',
             'cooking_technology' => 'nullable|string',
@@ -61,6 +62,7 @@ class ProductController extends Controller
         }
         $data['unlimited'] = $request->has('unlimited');
         $data['made_to_order'] = $request->has('made_to_order');
+        // ready_to_eat не изменяем
 
         $product = Product::create($data);
 
@@ -81,7 +83,9 @@ class ProductController extends Controller
         $allProducts = Product::where('id', '!=', $product->id)->orderBy('name')->get();
         $relatedIds = $product->relatedProducts()->pluck('related_product_id')->toArray();
 
-        return view('admin.products.edit', compact('product', 'categories', 'partners', 'allProducts', 'relatedIds'));
+        $characteristics = \App\Models\Characteristic::orderBy('order')->get();
+        return view('admin.products.edit', compact('product', 'categories', 'partners', 'allProducts', 'relatedIds', 'characteristics'));
+
     }
 
     public function update(Request $request, Product $product)
@@ -96,6 +100,7 @@ class ProductController extends Controller
             'stock' => 'nullable|integer|min:0',
             'unlimited' => 'boolean',
             'made_to_order' => 'boolean',
+            // 'ready_to_eat' убрано
             'partner_id' => 'nullable|exists:partners,id',
             'commission_percent' => 'nullable|integer|min:0|max:100',
             'cooking_technology' => 'nullable|string',
@@ -124,6 +129,12 @@ class ProductController extends Controller
             $product->relatedProducts()->sync($related);
         } else {
             $product->relatedProducts()->detach();
+        }
+
+        if ($request->has('characteristics')) {
+            $product->characteristics()->sync($request->characteristics);
+        } else {
+            $product->characteristics()->detach();
         }
 
         return redirect()->route('admin.products.index')->with('success', 'Товар обновлён');

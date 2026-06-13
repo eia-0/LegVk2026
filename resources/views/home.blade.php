@@ -2,19 +2,11 @@
 
 @section('title', 'Каталог - ЛегендаВкуса')
 
-@push('styles')
-    <style>
-        /* Отключаем прилипание шапки только на странице каталога */
-        nav.sticky {
-            position: static !important;
-        }
-    </style>
-@endpush
-
 @section('content')
     <div class="mb-4 sm:mb-8">
         @php
             $settings = \App\Models\ShopSetting::getSettings();
+            // Сохраняем текущие параметры запроса для использования в форме и ссылках
             $currentCategory = request('category');
             $currentSearch = request('search');
             $currentSort = request('sort');
@@ -149,44 +141,54 @@
     @endif
 
     {{-- Заголовок товаров и панель поиска/сортировки --}}
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 sm:mb-6 gap-2 sm:gap-4">
-        <h2 class="text-2xl font-bold text-gray-800">
-            @if($currentCategory)
-                {{ $currentCategoryModel->name ?? 'Товары' }}
-            @else
-                Все товары
-            @endif
-        </h2>
-        <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            {{-- Поиск --}}
-            <form action="{{ route('home') }}" method="GET" class="flex">
-                @if($currentCategory)
-                    <input type="hidden" name="category" value="{{ $currentCategory }}">
+    <div class="mb-3 sm:mb-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
+            <h2 class="text-2xl font-bold text-gray-800">
+                @if(request()->has('products'))
+                    Продукты и товары
+                @elseif($currentCategory)
+                    {{ $currentCategoryModel->name ?? 'Товары' }}
+                @else
+                    Еда
                 @endif
-                <input type="text" name="search" value="{{ $currentSearch }}" placeholder="Поиск по названию..." 
-                       class="w-full sm:w-48 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-amber-500 focus:border-amber-500">
-                <button type="submit" class="ml-2 bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg text-sm transition">
-                    <span class="text-gray-200">🔍</span>
-                </button>
-            </form>
-            {{-- Сортировка --}}
-            <form action="{{ route('home') }}" method="GET" id="sort-form" class="flex">
-                @if($currentCategory)
-                    <input type="hidden" name="category" value="{{ $currentCategory }}">
-                @endif
-                @if($currentSearch)
-                    <input type="hidden" name="search" value="{{ $currentSearch }}">
-                @endif
-                <select name="sort" onchange="this.form.submit()" 
-                        class="w-full sm:w-44 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-amber-500 focus:border-amber-500">
-                    <option value="">По умолчанию</option>
-                    <option value="own" {{ $currentSort == 'own' ? 'selected' : '' }}>Только ЛегендаВкуса</option>
-                    <option value="price_asc" {{ $currentSort == 'price_asc' ? 'selected' : '' }}>Цена: по возрастанию</option>
-                    <option value="price_desc" {{ $currentSort == 'price_desc' ? 'selected' : '' }}>Цена: по убыванию</option>
-                    <option value="name_asc" {{ $currentSort == 'name_asc' ? 'selected' : '' }}>Название: А → Я</option>
-                    <option value="name_desc" {{ $currentSort == 'name_desc' ? 'selected' : '' }}>Название: Я → А</option>
-                </select>
-            </form>
+            </h2>
+            <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                {{-- Поиск --}}
+                <form action="{{ route('home') }}" method="GET" class="flex">
+                    @if($currentCategory)
+                        <input type="hidden" name="category" value="{{ $currentCategory }}">
+                    @endif
+                    @if(request()->has('products'))
+                        <input type="hidden" name="products" value="1">
+                    @endif
+                    <input type="text" name="search" value="{{ $currentSearch }}" placeholder="Найти в ЛегендеВкуса" 
+                           class="w-full sm:w-48 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-amber-500 focus:border-amber-500">
+                    <button type="submit" class="ml-2 bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg text-sm transition">
+                        <span class="text-gray-200">🔍</span>
+                    </button>
+                </form>
+                {{-- Сортировка --}}
+                <form action="{{ route('home') }}" method="GET" id="sort-form" class="flex">
+                    @if($currentCategory)
+                        <input type="hidden" name="category" value="{{ $currentCategory }}">
+                    @endif
+                    @if($currentSearch)
+                        <input type="hidden" name="search" value="{{ $currentSearch }}">
+                    @endif
+                    @if(request()->has('products'))
+                        <input type="hidden" name="products" value="1">
+                    @endif
+                    <select name="sort" onchange="this.form.submit()" 
+                            class="w-full sm:w-44 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-amber-500 focus:border-amber-500">
+                        <option value="">По умолчанию</option>
+                        <option value="own" {{ $currentSort == 'own' ? 'selected' : '' }}>Только ЛегендаВкуса</option>
+                        <option value="price_asc" {{ $currentSort == 'price_asc' ? 'selected' : '' }}>Цена: по возрастанию</option>
+                        <option value="price_desc" {{ $currentSort == 'price_desc' ? 'selected' : '' }}>Цена: по убыванию</option>
+                        <option value="name_asc" {{ $currentSort == 'name_asc' ? 'selected' : '' }}>Название: А → Я</option>
+                        <option value="name_desc" {{ $currentSort == 'name_desc' ? 'selected' : '' }}>Название: Я → А</option>
+                    </select>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -197,6 +199,7 @@
                 $isAvailable = $product->unlimited || ($product->stock !== null && $product->stock > 0);
                 $isMadeToOrder = $product->made_to_order;
                 $canPurchase = $isAvailable || $isMadeToOrder;
+                $isReadyEat = $product->category && $product->category->show_in_ready_eat;
             @endphp
             <div class="product-card bg-white rounded-2xl shadow-md overflow-hidden transition duration-300 flex flex-col"
                  x-data="{ inCart: {{ $cartQuantities[$product->id] ?? 0 }} }"
@@ -209,25 +212,37 @@
                             <img src="{{ asset('images/p.svg') }}" alt="Партнер" class="w-4 h-4">
                         </div>
                     @endif
+                    @if($product->characteristics->isNotEmpty())
+                        <div class="absolute bottom-2 left-2 flex flex-wrap gap-1">
+                            @foreach($product->characteristics->sortBy('order') as $characteristic)
+                                <span class="text-white text-xs px-1.5 py-0.5 rounded-md" style="background-color: {{ $characteristic->color }}">
+                                    {{ $characteristic->icon }} {{ $characteristic->name }}
+                                </span>
+                            @endforeach
+                        </div>
+                    @endif
                 </a>
                 <div class="p-2 sm:p-5 flex flex-col flex-1">
                     <h3 class="text-xs sm:text-lg font-bold text-gray-800 line-clamp-2 leading-tight">{{ $product->name }}</h3>
 
-                    {{-- Категория и время приготовления в одной строке --}}
                     <div class="flex justify-between items-center mt-0.5">
                         <p class="text-xs text-gray-500">{{ $product->category->name ?? '' }}</p>
                         @if($product->preparation_time > 0)
                             <p class="text-xs text-gray-400">⏱ ≈ {{ $product->preparation_time }} мин</p>
+                        @elseif($isReadyEat)
+                            <p class="text-xs text-green-600 font-medium">🍽️ Готово</p>
                         @endif
                     </div>
 
                     {{-- Наличие и цена --}}
                     <div class="mt-auto pt-2 flex items-center justify-between">
                         <p class="text-xs sm:text-sm">
-                            @if($product->unlimited)
-                                <span class="font-semibold bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text">В наличии</span>
-                            @elseif($product->stock !== null && $product->stock > 0)
-                                <span class="font-semibold bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text">В наличии: {{ $product->stock }} шт.</span>
+                            @if($isAvailable)
+                                @if($product->unlimited)
+                                    <span class="font-semibold bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text">В наличии</span>
+                                @else
+                                    <span class="font-semibold bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text">В наличии: {{ $product->stock }} шт.</span>
+                                @endif
                             @elseif($isMadeToOrder)
                                 <span class="font-semibold bg-gradient-to-r from-amber-500 to-orange-500 text-transparent bg-clip-text">Под заказ</span>
                             @else
@@ -276,7 +291,6 @@
                                 @endif
                             @endauth
                         @else
-                            {{-- Неактивная кнопка "Нет в наличии" --}}
                             <span class="block w-full text-center bg-gradient-to-r from-purple-500/50 to-pink-500/50 text-white rounded-xl text-xs sm:text-sm py-2 px-5 font-semibold cursor-not-allowed">
                                 Нет в наличии
                             </span>
@@ -285,7 +299,7 @@
                 </div>
             </div>
 
-            {{-- Баннер только один раз после 6-го товара (мобильные) --}}
+            {{-- Баннер --}}
             @if($loop->iteration == 6)
                 @php
                     $banners = \App\Models\Banner::where('active', true)->orderBy('order')->get();

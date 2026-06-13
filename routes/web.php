@@ -13,12 +13,24 @@ use App\Http\Controllers\Admin\PartnerController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\CourierController;
-use App\Http\Controllers\CourierProfileController;
+use App\Http\Controllers\Admin\CharacteristicController;
 
 // Главная страница
 Route::get('/', function (Request $request) {
-    $categories = cache()->remember('home_categories', 3600, function () {
-        return \App\Models\Category::with('children')->whereNull('parent_id')->get();
+    $showProducts = $request->has('products');
+
+    // Разные ключи кэша для разных разделов
+    $cacheKey = $showProducts ? 'home_categories_products' : 'home_categories_food';
+
+    $categories = cache()->remember($cacheKey, 3600, function () use ($showProducts) {
+        return \App\Models\Category::with('children')
+            ->whereNull('parent_id')
+            ->when($showProducts, function ($query) {
+                $query->where('show_in_ready_eat', true);
+            }, function ($query) {
+                $query->where('show_in_catalog', true);
+            })
+            ->get();
     });
 
     $productsQuery = \App\Models\Product::with('category');
@@ -40,6 +52,17 @@ Route::get('/', function (Request $request) {
     if ($request->filled('search')) {
         $search = $request->input('search');
         $productsQuery->where('name', 'like', "%{$search}%");
+    }
+
+    // Фильтр по разделу: показываем только товары, чьи категории отмечены для текущего раздела
+    if ($showProducts) {
+        $productsQuery->whereHas('category', function ($query) {
+            $query->where('show_in_ready_eat', true);
+        });
+    } else {
+        $productsQuery->whereHas('category', function ($query) {
+            $query->where('show_in_catalog', true);
+        });
     }
 
     // Сортировка
@@ -99,8 +122,6 @@ Route::middleware(['auth', 'courier'])->group(function () {
     Route::get('/courier', [CourierController::class, 'index'])->name('courier.index');
     Route::post('/courier/{order}/accept', [CourierController::class, 'accept'])->name('courier.accept');
     Route::patch('/courier/{order}/status', [CourierController::class, 'updateStatus'])->name('courier.updateStatus');
-    Route::get('/courier/profile', [CourierProfileController::class, 'edit'])->name('courier.profile.edit');
-    Route::patch('/courier/profile', [CourierProfileController::class, 'update'])->name('courier.profile.update');
 });
 
 // Админка
@@ -126,6 +147,8 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
 
     Route::get('settings', [ShopSettingController::class, 'edit'])->name('settings.edit');
     Route::patch('settings', [ShopSettingController::class, 'update'])->name('settings.update');
+
+    Route::resource('characteristics', CharacteristicController::class)->except(['show']);
 });
 
 Route::get('/cooperation', function () {

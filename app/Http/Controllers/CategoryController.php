@@ -25,16 +25,21 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
             'parent_id' => 'nullable|exists:categories,id',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'show_in_catalog' => 'boolean',
+            'show_in_ready_eat' => 'boolean',
         ]);
 
-        $data = $request->only('name', 'parent_id');
+        $data = $request->only('name', 'parent_id', 'show_in_catalog', 'show_in_ready_eat');
+        $data['show_in_catalog'] = $request->has('show_in_catalog');
+        $data['show_in_ready_eat'] = $request->has('show_in_ready_eat');
+
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('categories', 'public');
         }
         Category::create($data);
 
-        // Сбрасываем кэш категорий
-        cache()->forget('home_categories');
+        cache()->forget('home_categories_food');
+        cache()->forget('home_categories_products');
 
         return redirect()->route('admin.categories.index')->with('success', 'Категория создана');
     }
@@ -51,9 +56,14 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
             'parent_id' => 'nullable|exists:categories,id',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'show_in_catalog' => 'boolean',
+            'show_in_ready_eat' => 'boolean',
         ]);
 
-        $data = $request->only('name', 'parent_id');
+        $data = $request->only('name', 'parent_id', 'show_in_catalog', 'show_in_ready_eat');
+        $data['show_in_catalog'] = $request->has('show_in_catalog');
+        $data['show_in_ready_eat'] = $request->has('show_in_ready_eat');
+
         if ($request->hasFile('image')) {
             if ($category->image) {
                 \Storage::disk('public')->delete($category->image);
@@ -62,8 +72,8 @@ class CategoryController extends Controller
         }
         $category->update($data);
 
-        // Сбрасываем кэш категорий
-        cache()->forget('home_categories');
+        cache()->forget('home_categories_food');
+        cache()->forget('home_categories_products');
 
         return redirect()->route('admin.categories.index')->with('success', 'Категория обновлена');
     }
@@ -75,8 +85,8 @@ class CategoryController extends Controller
         }
         $category->delete();
 
-        // Сбрасываем кэш категорий
-        cache()->forget('home_categories');
+        cache()->forget('home_categories_food');
+        cache()->forget('home_categories_products');
 
         return redirect()->route('admin.categories.index')->with('success', 'Категория удалена');
     }

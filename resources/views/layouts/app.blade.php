@@ -61,19 +61,28 @@
 
                 {{-- Десктопная навигация --}}
                 <div class="hidden md:flex items-center space-x-4">
-                    <a href="{{ route('home') }}" class="text-gray-700 hover:text-amber-600 font-medium">Каталог</a>
+                    <a href="{{ route('home') }}" class="text-gray-700 hover:text-amber-600 font-medium flex items-center space-x-1">
+                        <span>🍔</span>
+                        <span>Еда</span>
+                    </a>
+                    <a href="{{ route('home', ['products' => 1]) }}" class="text-gray-700 hover:text-amber-600 font-medium flex items-center space-x-1">
+                        <span>🛍️</span>
+                        <span>Продукты / товары</span>
+                    </a>
                     @auth
                         @if(auth()->user()->role === 'courier')
                             <a href="{{ route('courier.index') }}" class="text-gray-700 hover:text-amber-600 font-medium">Курьерская</a>
                         @endif
-                        <a href="{{ route('cart.index') }}" class="text-gray-700 hover:text-amber-600 relative font-medium">
-                            Корзина
+                        <a href="{{ route('cart.index') }}" class="text-gray-700 hover:text-amber-600 relative font-medium flex items-center space-x-1">
+                            <span>🛒</span>
+                            <span>Корзина</span>
                             <span x-show="cartCount > 0" x-text="cartCount"
                                   class="absolute -top-2 -right-4 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center shadow"
                                   style="display: none;"></span>
                         </a>
-                        <a href="{{ route('orders.index') }}" class="text-gray-700 hover:text-amber-600 relative font-medium">
-                            Мои заказы
+                        <a href="{{ route('orders.index') }}" class="text-gray-700 hover:text-amber-600 relative font-medium flex items-center space-x-1">
+                            <span>📦</span>
+                            <span>Мои заказы</span>
                             @if(($activeOrders = auth()->user()->orders()->whereIn('status', ['new','processing'])->count()) > 0)
                                 <span class="absolute -top-2 -right-4 bg-green-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center shadow">{{ $activeOrders }}</span>
                             @endif
@@ -104,7 +113,7 @@
                                 </svg>
                             </button>
                             <div x-show="open" @click.away="open = false" class="absolute right-4 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                                <a href="{{ route('home') }}" class="block px-4 py-2 text-gray-700">Каталог</a>
+                                <a href="{{ route('home') }}" class="block px-4 py-2 text-gray-700">Еда</a>
                                 <a href="{{ route('cart.index') }}" class="block px-4 py-2">Корзина</a>
                                 <a href="{{ route('orders.index') }}" class="block px-4 py-2">Заказы</a>
                                 @if(auth()->user()->is_admin)
@@ -146,24 +155,28 @@
     {{-- Нижняя мобильная навигация --}}
     @auth
     <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
-        <div class="flex justify-around items-center h-16">
-            <a href="{{ route('home') }}" class="flex flex-col items-center justify-center flex-1 h-full {{ request()->routeIs('home') ? 'text-amber-600' : 'text-gray-500' }}">
-                <span class="text-2xl">🏠</span>
-                <span class="text-xs">Каталог</span>
+        <div class="flex justify-around items-start h-16 pt-1">
+            <a href="{{ route('home') }}" class="flex flex-col items-center justify-center flex-1 h-full {{ request()->routeIs('home') && !request()->has('products') ? 'text-amber-600' : 'text-gray-500' }}">
+                <span class="text-2xl leading-none">🍔</span>
+                <span class="text-xs mt-0.5">Еда</span>
+            </a>
+            <a href="{{ route('home', ['products' => 1]) }}" class="flex flex-col items-center justify-center flex-1 h-full {{ request()->has('products') ? 'text-amber-600' : 'text-gray-500' }}">
+                <span class="text-2xl leading-none">🛍️</span>
+                <span class="text-xs text-center mt-0.5">Продукты<br> / товары</span>
             </a>
             <a href="{{ route('cart.index') }}" class="flex flex-col items-center justify-center flex-1 h-full relative {{ request()->routeIs('cart.*') ? 'text-amber-600' : 'text-gray-500' }}">
-                <span class="text-2xl">🛒</span>
+                <span class="text-2xl leading-none">🛒</span>
                 <span x-show="cartCount > 0" x-text="cartCount"
-                      class="absolute top-1 right-1/3 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
+                      class="absolute top-0 right-1/4 bg-red-500 text-white text-[8px] rounded-full h-3.5 w-3.5 flex items-center justify-center"
                       style="display: none;"></span>
-                <span class="text-xs">Корзина</span>
+                <span class="text-xs mt-0.5">Корзина</span>
             </a>
             <a href="{{ route('orders.index') }}" class="flex flex-col items-center justify-center flex-1 h-full relative {{ request()->routeIs('orders.*') ? 'text-amber-600' : 'text-gray-500' }}">
-                <span class="text-2xl">📦</span>
+                <span class="text-2xl leading-none">📦</span>
                 @if(($activeOrders = auth()->user()->orders()->whereIn('status', ['new','processing'])->count()) > 0)
-                    <span class="absolute top-1 right-1/3 bg-green-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ $activeOrders }}</span>
+                    <span class="absolute top-0 right-1/4 bg-green-500 text-white text-[8px] rounded-full h-3.5 w-3.5 flex items-center justify-center">{{ $activeOrders }}</span>
                 @endif
-                <span class="text-xs">Мои заказы</span>
+                <span class="text-xs mt-0.5">Мои заказы</span>
             </a>
         </div>
     </nav>

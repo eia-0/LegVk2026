@@ -16,6 +16,7 @@ class Product extends Model
         'stock',
         'unlimited',
         'made_to_order',
+        'ready_to_eat',
         'partner_id',
         'commission_percent',
         'payout_reset_at',
@@ -25,6 +26,7 @@ class Product extends Model
     protected $casts = [
         'unlimited'          => 'boolean',
         'made_to_order'      => 'boolean',
+        'ready_to_eat'       => 'boolean',
         'commission_percent' => 'integer',
         'payout_reset_at'    => 'datetime',
     ];
@@ -57,9 +59,6 @@ class Product extends Model
         }
     }
 
-    /**
-     * Продажи с момента последнего обнуления (payout_reset_at)
-     */
     public function soldSinceLastPayout(): int
     {
         return $this->orderItems()
@@ -70,13 +69,15 @@ class Product extends Model
             ->sum('quantity');
     }
 
-    /**
-     * Связанные товары для блока "С этим также берут"
-     */
     public function relatedProducts()
     {
         return $this->belongsToMany(Product::class, 'product_related', 'product_id', 'related_product_id')
                     ->withPivot('order')
                     ->orderBy('order');
+    }
+    
+    public function characteristics()
+    {
+        return $this->belongsToMany(Characteristic::class);
     }
 }

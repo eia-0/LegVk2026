@@ -1,4 +1,5 @@
 @extends('admin.layout')
+
 @section('admin-content')
     <div class="flex justify-between items-center mb-4">
         <h1 class="text-2xl font-bold">Категории</h1>
@@ -9,10 +10,13 @@
             <div class="p-4 border-b flex justify-between items-center">
                 <div>
                     <span class="font-semibold">{{ $category->name }}</span>
+                    <span class="text-xs text-gray-500 ml-2">
+                        ({{ $category->show_in_catalog ? 'Еда' : '' }}{{ $category->show_in_catalog && $category->show_in_ready_eat ? ', ' : '' }}{{ $category->show_in_ready_eat ? 'Продукты и товары' : '' }})
+                    </span>
                     @if($category->children->count())
                         <ul class="ml-4 mt-1 text-sm text-gray-600">
                             @foreach($category->children as $child)
-                                <li>- {{ $child->name }}</li>
+                                <li>- {{ $child->name }} <span class="text-xs text-gray-400">({{ $child->show_in_catalog ? 'Еда' : '' }}{{ $child->show_in_catalog && $child->show_in_ready_eat ? ', ' : '' }}{{ $child->show_in_ready_eat ? 'Продукты и товары' : '' }})</span></li>
                             @endforeach
                         </ul>
                     @endif

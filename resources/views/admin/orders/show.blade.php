@@ -89,6 +89,15 @@
                         @else
                             {{ $item->product->name ?? 'Товар удалён' }}
                         @endif
+                        @if($product->characteristics->isNotEmpty())
+                        <div class="absolute bottom-2 left-2 flex flex-wrap gap-1">
+                            @foreach($product->characteristics->sortBy('order') as $characteristic)
+                                <span class="text-white text-xs px-1.5 py-0.5 rounded-md" style="background-color: {{ $characteristic->color }}">
+                                    {{ $characteristic->icon }} {{ $characteristic->name }}
+                                </span>
+                            @endforeach
+                        </div>
+                    @endif
                     </td>
                     <td class="p-3">{{ $item->price }} ₽</td>
                     <td class="p-3 text-center">{{ $item->quantity }}</td>

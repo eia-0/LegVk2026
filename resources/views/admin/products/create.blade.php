@@ -68,12 +68,39 @@
                 <select name="category_id" class="w-full border rounded p-2" required>
                     <option value="">Выберите</option>
                     @foreach(\App\Models\Category::with('children')->get() as $cat)
-                        <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                        @php
+                            $catLabels = [];
+                            if ($cat->show_in_catalog) $catLabels[] = 'Еда';
+                            if ($cat->show_in_ready_eat) $catLabels[] = 'Продукты и товары';
+                            $catLabel = $catLabels ? ' (' . implode(', ', $catLabels) . ')' : '';
+                        @endphp
+                        <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>
+                            {{ $cat->name }}{{ $catLabel }}
+                        </option>
                         @foreach($cat->children as $child)
-                            <option value="{{ $child->id }}" {{ old('category_id') == $child->id ? 'selected' : '' }}>— {{ $child->name }}</option>
+                            @php
+                                $childLabels = [];
+                                if ($child->show_in_catalog) $childLabels[] = 'Еда';
+                                if ($child->show_in_ready_eat) $childLabels[] = 'Продукты и товары';
+                                $childLabel = $childLabels ? ' (' . implode(', ', $childLabels) . ')' : '';
+                            @endphp
+                            <option value="{{ $child->id }}" {{ old('category_id') == $child->id ? 'selected' : '' }}>
+                                — {{ $child->name }}{{ $childLabel }}
+                            </option>
                         @endforeach
                     @endforeach
-                </select>
+                </select>   
+            </div>
+            div class="md:col-span-2">
+                <label class="block mb-1">Характеристики</label>
+                <div class="flex flex-wrap gap-2">
+                    @foreach(\App\Models\Characteristic::orderBy('order')->get() as $characteristic)
+                        <label class="flex items-center space-x-1 text-sm">
+                            <input type="checkbox" name="characteristics[]" value="{{ $characteristic->id }}" {{ in_array($characteristic->id, old('characteristics', [])) ? 'checked' : '' }} class="text-amber-600">
+                            <span>{{ $characteristic->icon }} {{ $characteristic->name }}</span>
+                        </label>
+                    @endforeach
+                </div>
             </div>
             <div>
                 <label class="block mb-1">Изображение</label>

@@ -67,9 +67,25 @@
                 <label class="block mb-1">Категория</label>
                 <select name="category_id" class="w-full border rounded p-2" required>
                     @foreach(\App\Models\Category::with('children')->get() as $cat)
-                        <option value="{{ $cat->id }}" {{ old('category_id', $product->category_id) == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                        @php
+                            $catLabels = [];
+                            if ($cat->show_in_catalog) $catLabels[] = 'Еда';
+                            if ($cat->show_in_ready_eat) $catLabels[] = 'Продукты и товары';
+                            $catLabel = $catLabels ? ' (' . implode(', ', $catLabels) . ')' : '';
+                        @endphp
+                        <option value="{{ $cat->id }}" {{ old('category_id', $product->category_id) == $cat->id ? 'selected' : '' }}>
+                            {{ $cat->name }}{{ $catLabel }}
+                        </option>
                         @foreach($cat->children as $child)
-                            <option value="{{ $child->id }}" {{ old('category_id', $product->category_id) == $child->id ? 'selected' : '' }}>— {{ $child->name }}</option>
+                            @php
+                                $childLabels = [];
+                                if ($child->show_in_catalog) $childLabels[] = 'Еда';
+                                if ($child->show_in_ready_eat) $childLabels[] = 'Продукты и товары';
+                                $childLabel = $childLabels ? ' (' . implode(', ', $childLabels) . ')' : '';
+                            @endphp
+                            <option value="{{ $child->id }}" {{ old('category_id', $product->category_id) == $child->id ? 'selected' : '' }}>
+                                — {{ $child->name }}{{ $childLabel }}
+                            </option>
                         @endforeach
                     @endforeach
                 </select>
