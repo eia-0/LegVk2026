@@ -134,7 +134,7 @@
         </div>
     </nav>
 
-    <main class="flex-grow container mx-auto px-2.5 sm:px-6 lg:px-8 py-8">
+    <main class="flex-grow container mx-auto px-2 sm:px-6 lg:px-8 py-8">
         @if(session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl mb-4">
                 {{ session('success') }}

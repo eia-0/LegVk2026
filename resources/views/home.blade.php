@@ -95,7 +95,7 @@
     {{-- Категории --}}
     <div class="mb-4 sm:mb-8">
         <h2 class="text-2xl font-bold text-gray-800 mb-3 sm:mb-6">Категории</h2>
-        <div class="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-5 gap-1 sm:gap-4">
+        <div class="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-5 gap-0.5 sm:gap-4">
             @foreach($categories as $cat)
                 @php
                     $catImage = $cat->image 

@@ -23,8 +23,11 @@ Route::get('/', function (Request $request) {
     $cacheKey = $showProducts ? 'home_categories_products' : 'home_categories_food';
 
     $categories = cache()->remember($cacheKey, 3600, function () use ($showProducts) {
-        return \App\Models\Category::with('children')
+        return \App\Models\Category::with(['children' => function ($q) {
+                $q->orderBy('order');
+            }])
             ->whereNull('parent_id')
+            ->orderBy('order')               // <-- сортировка корневых категорий
             ->when($showProducts, function ($query) {
                 $query->where('show_in_ready_eat', true);
             }, function ($query) {
@@ -54,7 +57,7 @@ Route::get('/', function (Request $request) {
         $productsQuery->where('name', 'like', "%{$search}%");
     }
 
-    // Фильтр по разделу: показываем только товары, чьи категории отмечены для текущего раздела
+    // Фильтр по разделу
     if ($showProducts) {
         $productsQuery->whereHas('category', function ($query) {
             $query->where('show_in_ready_eat', true);
@@ -65,7 +68,7 @@ Route::get('/', function (Request $request) {
         });
     }
 
-    // Сортировка
+    // Сортировка товаров
     $sort = $request->input('sort');
     switch ($sort) {
         case 'own':
@@ -129,6 +132,10 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('categories', CategoryController::class)->except(['show']);
+    // Маршруты для управления порядком категорий
+    Route::post('/categories/{category}/move-up', [CategoryController::class, 'moveUp'])->name('categories.moveUp');
+    Route::post('/categories/{category}/move-down', [CategoryController::class, 'moveDown'])->name('categories.moveDown');
+
     Route::resource('products', ProductController::class)->except(['show']);
     Route::post('partners/{partner}/products/{product}/reset-payout', [PartnerController::class, 'resetPayout'])
          ->name('partners.reset-payout');
