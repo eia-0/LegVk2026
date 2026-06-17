@@ -227,7 +227,8 @@
                 <div class="p-2 sm:p-5 flex flex-col flex-1">
                     <h3 class="text-xs sm:text-lg font-bold text-gray-800 line-clamp-2 leading-tight">{{ $product->name }}</h3>
 
-                    <div class="flex justify-between items-center mt-0.5">
+                    {{-- Категория и время (вертикально) --}}
+                    <div class="mt-0.5">
                         <p class="text-xs text-gray-500">{{ $product->category->name ?? '' }}</p>
                         @if($product->preparation_time > 0)
                             <p class="text-xs text-gray-400">⏱ ≈ {{ $product->preparation_time }} мин</p>

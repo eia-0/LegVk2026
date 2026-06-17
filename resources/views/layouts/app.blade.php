@@ -62,7 +62,7 @@
                 {{-- Десктопная навигация --}}
                 <div class="hidden md:flex items-center space-x-4">
                     <a href="{{ route('home') }}" class="text-gray-700 hover:text-amber-600 font-medium flex items-center space-x-1">
-                        <span>🍔</span>
+                        <span>🍽️</span>
                         <span>Еда</span>
                     </a>
                     <a href="{{ route('home', ['products' => 1]) }}" class="text-gray-700 hover:text-amber-600 font-medium flex items-center space-x-1">
@@ -157,7 +157,7 @@
     <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
         <div class="flex justify-around items-start h-16 pt-1">
             <a href="{{ route('home') }}" class="flex flex-col items-center justify-center flex-1 h-full {{ request()->routeIs('home') && !request()->has('products') ? 'text-amber-600' : 'text-gray-500' }}">
-                <span class="text-2xl leading-none">🍔</span>
+                <span class="text-2xl leading-none">🍽️</span>
                 <span class="text-xs mt-0.5">Еда</span>
             </a>
             <a href="{{ route('home', ['products' => 1]) }}" class="flex flex-col items-center justify-center flex-1 h-full {{ request()->has('products') ? 'text-amber-600' : 'text-gray-500' }}">
