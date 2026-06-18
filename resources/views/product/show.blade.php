@@ -7,7 +7,6 @@
          x-data="{ inCart: {{ $cartQuantity }}, quantity: 1 }"
          @product-cart-updated.window="if ($event.detail.productId == {{ $product->id }}) inCart = $event.detail.quantity">
         
-        {{-- Кнопка "Назад" --}}
         <button onclick="history.back()" class="mb-4 text-sm text-gray-500 hover:text-amber-600 transition flex items-center gap-1">
             ← Назад
         </button>
@@ -21,7 +20,6 @@
                         <img src="{{ asset('images/p.svg') }}" alt="Партнёр" class="w-5 h-5">
                     </div>
                 @endif
-                {{-- Плашки характеристик --}}
                 @if($product->characteristics->isNotEmpty())
                     <div class="absolute bottom-3 left-3 flex flex-wrap gap-1 z-10">
                         @foreach($product->characteristics->sortBy('order') as $characteristic)
@@ -41,9 +39,11 @@
                 <p class="text-xl font-semibold mt-2 {{ $product->made_to_order ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-transparent bg-clip-text' : 'bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text' }}">
                     {{ number_format($product->price, 2) }} ₽
                 </p>
+                @if($product->weight)
+                    <p class="text-sm text-gray-600 mt-1">⚖️ Вес: {{ $product->weight }} г</p>
+                @endif
                 <p class="text-gray-600 text-sm mt-3">{{ $product->description }}</p>
                 
-                {{-- Технология приготовления (только для админа) --}}
                 @if(auth()->check() && auth()->user()->is_admin && $product->cooking_technology)
                     <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
                         <h3 class="text-sm font-semibold text-amber-800 mb-1">Технология приготовления</h3>
@@ -59,13 +59,11 @@
                 @auth
                     <div class="mt-4">
                         @if($product->made_to_order)
-                            {{-- «Обсудить детали» янтарная --}}
                             <a href="https://vk.com/legenda_vkusa" target="_blank"
                                class="inline-block bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-medium py-2 px-6 rounded-full text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
                                 Обсудить детали
                             </a>
                         @else
-                            {{-- «В корзину» фиолетово‑розовая --}}
                             <template x-if="inCart === 0">
                                 <div class="flex items-center space-x-3">
                                     <input type="number" x-model="quantity" value="1" min="1" class="w-14 border border-gray-300 rounded-lg px-2 py-1.5 text-sm">
@@ -103,7 +101,6 @@
             </div>
         </div>
 
-        {{-- Блок "С этим также берут" --}}
         @if($product->relatedProducts->isNotEmpty())
             <div class="mt-8">
                 <h3 class="text-xl font-semibold text-gray-800 mb-4">С этим также берут</h3>

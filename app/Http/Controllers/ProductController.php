@@ -17,7 +17,6 @@ class ProductController extends Controller
                 ->where('product_id', $product->id)->first();
             $cartQuantity = $cartItem ? $cartItem->quantity : 0;
         }
-        // Подгружаем характеристики, чтобы плашки отображались на странице товара
         $product->load('partner', 'relatedProducts', 'characteristics');
         return view('product.show', compact('product', 'cartQuantity'));
     }
@@ -44,6 +43,7 @@ class ProductController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'category_id' => 'required|exists:categories,id',
             'preparation_time' => 'nullable|integer|min:0',
+            'weight' => 'nullable|integer|min:1',
             'stock' => 'nullable|integer|min:0',
             'unlimited' => 'boolean',
             'made_to_order' => 'boolean',
@@ -54,7 +54,7 @@ class ProductController extends Controller
 
         $data = $request->only(
             'name', 'description', 'price', 'category_id', 'preparation_time',
-            'stock', 'unlimited', 'partner_id', 'cooking_technology', 'made_to_order'
+            'weight', 'stock', 'unlimited', 'partner_id', 'cooking_technology', 'made_to_order'
         );
         $data['commission_percent'] = $request->partner_id ? $request->commission_percent : null;
         if ($request->hasFile('image')) {
@@ -65,7 +65,6 @@ class ProductController extends Controller
 
         $product = Product::create($data);
 
-        // Синхронизация характеристик (теперь работает и при создании)
         if ($request->has('characteristics')) {
             $product->characteristics()->sync($request->characteristics);
         } else {
@@ -102,6 +101,7 @@ class ProductController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'category_id' => 'required|exists:categories,id',
             'preparation_time' => 'nullable|integer|min:0',
+            'weight' => 'nullable|integer|min:1',
             'stock' => 'nullable|integer|min:0',
             'unlimited' => 'boolean',
             'made_to_order' => 'boolean',
@@ -112,7 +112,7 @@ class ProductController extends Controller
 
         $data = $request->only(
             'name', 'description', 'price', 'category_id', 'preparation_time',
-            'stock', 'unlimited', 'partner_id', 'cooking_technology', 'made_to_order'
+            'weight', 'stock', 'unlimited', 'partner_id', 'cooking_technology', 'made_to_order'
         );
         $data['commission_percent'] = $request->partner_id ? $request->commission_percent : null;
         if ($request->hasFile('image')) {
@@ -135,7 +135,6 @@ class ProductController extends Controller
             $product->relatedProducts()->detach();
         }
 
-        // Синхронизация характеристик
         if ($request->has('characteristics')) {
             $product->characteristics()->sync($request->characteristics);
         } else {

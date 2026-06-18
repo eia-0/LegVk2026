@@ -25,6 +25,12 @@
                 <input type="number" name="preparation_time" value="{{ old('preparation_time', $product->preparation_time) }}" class="w-full border rounded p-2">
             </div>
 
+            {{-- Вес --}}
+            <div>
+                <label class="block mb-1 font-medium">Вес (грамм)</label>
+                <input type="number" name="weight" value="{{ old('weight', $product->weight) }}" class="w-full border rounded p-2" placeholder="Например, 250">
+            </div>
+
             {{-- Количество на складе --}}
             <div>
                 <label class="block mb-1 font-medium">Количество на складе</label>

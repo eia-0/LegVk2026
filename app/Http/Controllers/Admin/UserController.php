@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -30,10 +32,23 @@ class UserController extends Controller
             'role' => 'required|in:user,courier',
         ]);
 
-        // Обновляем поле role, а не is_courier
         $user->role = $request->role;
         $user->save();
 
         return back()->with('success', 'Роль пользователя обновлена');
+    }
+
+    /**
+     * Сброс пароля – генерируется новый читаемый пароль и показывается администратору.
+     */
+    public function resetPassword(User $user)
+    {
+        $password = Str::random(8); // 8 символов, только буквы/цифры
+
+        $user->update([
+            'password' => Hash::make($password),
+        ]);
+
+        return back()->with('success', "Новый пароль для {$user->name}: {$password}");
     }
 }

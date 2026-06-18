@@ -6,7 +6,6 @@
     <div class="mb-4 sm:mb-8">
         @php
             $settings = \App\Models\ShopSetting::getSettings();
-            // Сохраняем текущие параметры запроса для использования в форме и ссылках
             $currentCategory = request('category');
             $currentSearch = request('search');
             $currentSort = request('sort');
@@ -14,7 +13,6 @@
 
         {{-- Информация о самовывозе и доставке --}}
         <div class="bg-white rounded-2xl shadow-sm p-2.5 sm:p-4 space-y-2 sm:space-y-3 text-xs">
-            {{-- График работы + ссылка Партнёрам --}}
             @if($settings->opening_hours)
                 <div class="flex items-center justify-between">
                     <p class="text-gray-700 font-medium">
@@ -212,7 +210,6 @@
                             <img src="{{ asset('images/p.svg') }}" alt="Партнер" class="w-4 h-4">
                         </div>
                     @endif
-                    {{-- Плашки характеристик --}}
                     @if($product->characteristics->isNotEmpty())
                         <div class="absolute bottom-2 left-2 flex flex-wrap gap-1 z-10">
                             @foreach($product->characteristics->sortBy('order') as $characteristic)
@@ -227,15 +224,26 @@
                 <div class="p-2 sm:p-5 flex flex-col flex-1">
                     <h3 class="text-xs sm:text-lg font-bold text-gray-800 line-clamp-2 leading-tight">{{ $product->name }}</h3>
 
-                    {{-- Категория и время (вертикально) --}}
-                    <div class="mt-0.5">
-                        <p class="text-xs text-gray-500">{{ $product->category->name ?? '' }}</p>
-                        @if($product->preparation_time > 0)
-                            <p class="text-xs text-gray-400">⏱ ≈ {{ $product->preparation_time }} мин</p>
-                        @elseif($isReadyEat)
-                            <p class="text-xs text-green-600 font-medium">🍽️ Готово</p>
-                        @endif
-                    </div>
+                    {{-- Категория, вес и время --}}
+                <div class="mt-0.5">
+                    <p class="text-xs text-gray-500">{{ $product->category->name ?? '' }}</p>
+                    @if($product->weight || $product->preparation_time > 0 || $isReadyEat)
+                        <div class="flex justify-between items-center">
+                            @if($product->weight)
+                                <span class="text-xs text-gray-500">⚖️ {{ $product->weight }} г</span>
+                            @else
+                                <span></span>
+                            @endif
+                            @if($product->preparation_time > 0)
+                                <span class="text-xs text-gray-400">⏱ ≈ {{ $product->preparation_time }} мин</span>
+                            @elseif($isReadyEat)
+                                <span class="text-xs text-green-600 font-medium">🍽️ Готово</span>
+                            @else
+                                <span></span>
+                            @endif
+                        </div>
+                    @endif
+                </div>
 
                     {{-- Наличие и цена --}}
                     <div class="mt-auto pt-2 flex items-center justify-between">

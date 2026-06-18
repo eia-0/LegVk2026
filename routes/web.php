@@ -145,6 +145,8 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     // Пользователи
     Route::resource('users', UserController::class)->only(['index']);
     Route::patch('users/{user}/role', [UserController::class, 'updateRole'])->name('users.role');
+    // Сброс пароля
+    Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
 
     Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('orders/unseen-count', [AdminOrderController::class, 'unseenCount'])->name('orders.unseen-count');

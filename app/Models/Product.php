@@ -13,6 +13,7 @@ class Product extends Model
         'image',
         'category_id',
         'preparation_time',
+        'weight', // добавлено
         'stock',
         'unlimited',
         'made_to_order',
